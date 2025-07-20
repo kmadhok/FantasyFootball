@@ -1,0 +1,8 @@
+2025-07-17 13:53:00,302 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-07-17 13:53:00,302 - src.config.config - WARNING - Reddit API not configured - Reddit news monitoring disabled
+2025-07-17 13:53:00,302 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-07-17 13:53:00,302 - src.config.config - INFO - Configuration validation completed successfully
+2025-07-17 13:53:01,932 - __main__ - INFO - Successfully fetched 12 rosters from Sleeper
+2025-07-17 13:53:02,091 - __main__ - INFO - Successfully fetched 13 users from Sleeper
+2025-07-17 13:53:02,094 - __main__ - INFO - Fetching MFL rosters for league 73756
+2025-07-17 13:53:02,819 - __main__ - INFO - Successfully fetched 24 rosters from MFL
