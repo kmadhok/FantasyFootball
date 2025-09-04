@@ -1,11 +1,28 @@
 import os
 import logging
 from typing import Optional, List
+from pathlib import Path
 from dotenv import load_dotenv
 from datetime import datetime
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Detect project root directory
+def get_project_root() -> Path:
+    """Get the project root directory by looking for key files"""
+    current_path = Path(__file__).resolve()
+    
+    # Look for project markers (requirements.txt, .git, etc.)
+    for parent in current_path.parents:
+        if (parent / "requirements.txt").exists() or (parent / ".git").exists():
+            return parent
+    
+    # Fallback: assume we're in src/config/ and go up 2 levels
+    return current_path.parent.parent
+
+PROJECT_ROOT = get_project_root()
+DATA_DIR = PROJECT_ROOT / "data"
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +42,8 @@ class Config:
         self.MFL_LEAGUE_API_KEY: str = os.getenv('MFL_LEAGUE_API_KEY', '')
         
         # Database Configuration
-        self.DATABASE_URL: str = os.getenv('DATABASE_URL', 'sqlite:///data/fantasy_football.db')
+        default_db_path = f'sqlite:///{DATA_DIR / "fantasy_football.db"}'
+        self.DATABASE_URL: str = os.getenv('DATABASE_URL', default_db_path)
         
         # Redis Configuration
         self.REDIS_URL: str = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
@@ -98,12 +116,17 @@ class Config:
     
     def setup_logging(self):
         """Setup logging configuration"""
+        # Ensure data directory exists
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        
+        log_file_path = DATA_DIR / "fantasy_football.log"
+        
         logging.basicConfig(
             level=getattr(logging, self.LOG_LEVEL.upper()),
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             handlers=[
                 logging.StreamHandler(),
-                logging.FileHandler('data/fantasy_football.log')
+                logging.FileHandler(str(log_file_path))
             ]
         )
     
@@ -209,6 +232,18 @@ def get_mfl_config() -> dict:
         'league_id': config.MFL_LEAGUE_ID,
         'api_key': config.MFL_LEAGUE_API_KEY
     }
+
+def get_project_root_path() -> Path:
+    """Get the project root directory path"""
+    return PROJECT_ROOT
+
+def get_data_directory() -> Path:
+    """Get the data directory path"""
+    return DATA_DIR
+
+def ensure_data_directory():
+    """Ensure the data directory exists"""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Validate configuration on import
 if __name__ == "__main__":

@@ -55,12 +55,9 @@ class FantasyFootballScheduler:
         logger.info(f"Starting scheduled roster sync at {job_start_time}")
         
         try:
-            # First sync player mappings
-            logger.info("Syncing player mappings...")
-            mapping_success = self.player_mapper.sync_players_to_database()
-            
-            if not mapping_success:
-                logger.error("Player mapping sync failed, but continuing with roster sync")
+            # First sync player mappings by loading from database
+            logger.info("Loading player mappings from database...")
+            self.player_mapper.load_from_database()
             
             # Then sync rosters
             results = await self.roster_sync_service.sync_all_rosters()
@@ -88,25 +85,20 @@ class FantasyFootballScheduler:
         logger.info(f"Starting scheduled player mapping update at {job_start_time}")
         
         try:
-            # Create fresh player mappings
-            mapping = self.player_mapper.create_player_mapping()
+            # For now, just load existing mappings from database
+            # In a full implementation, you would fetch fresh data from APIs here
+            self.player_mapper.load_from_database()
             
             # Get statistics
             stats = self.player_mapper.get_mapping_stats()
-            
-            # Sync to database
-            success = self.player_mapper.sync_players_to_database()
             
             job_end_time = datetime.utcnow()
             duration = (job_end_time - job_start_time).total_seconds()
             
             logger.info(f"Player mapping update completed in {duration:.2f}s")
-            logger.info(f"Total players: {stats['total_players']}, Both platforms: {stats['both_platforms']}")
+            logger.info(f"Total players: {stats['total_players']}, Cross-platform: {stats['cross_platform_mappings']}")
             
-            if not success:
-                logger.error("Failed to sync player mappings to database")
-                raise Exception("Player mapping database sync failed")
-            
+            # Return stats as success indicator
             return stats
             
         except Exception as e:

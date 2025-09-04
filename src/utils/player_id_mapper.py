@@ -2,7 +2,6 @@ import logging
 import hashlib
 from typing import Dict, Optional, Any, List
 from dataclasses import dataclass
-from ..services.roster_sync import SleeperAPIClient, MFLAPIClient
 from ..database import SessionLocal, Player
 
 logger = logging.getLogger(__name__)
@@ -22,9 +21,10 @@ class PlayerIDMapper:
     """Maps platform-specific player IDs to canonical NFL IDs"""
     
     def __init__(self):
-        self.sleeper_client = SleeperAPIClient()
-        self.mfl_client = MFLAPIClient()
         self._player_cache: Dict[str, PlayerInfo] = {}
+        self.id_mappings: Dict[str, PlayerInfo] = {}
+        self.sleeper_to_canonical: Dict[str, str] = {}
+        self.mfl_to_canonical: Dict[str, str] = {}
         
     def generate_canonical_id(self, name: str, position: str, team: str) -> str:
         """Generate a canonical NFL ID based on player attributes"""
@@ -110,35 +110,15 @@ class PlayerIDMapper:
         
         return team_mappings.get(team, team)
     
-    def fetch_sleeper_players(self) -> Dict[str, Dict[str, Any]]:
-        """Fetch all players from Sleeper API"""
-        try:
-            logger.info("Fetching player data from Sleeper...")
-            players = self.sleeper_client.get_players()
-            logger.info(f"Successfully fetched {len(players)} players from Sleeper")
-            return players
-        except Exception as e:
-            logger.error(f"Failed to fetch Sleeper players: {e}")
-            return {}
     
-    def fetch_mfl_players(self) -> List[Dict[str, Any]]:
-        """Fetch all players from MFL API"""
-        try:
-            logger.info("Fetching player data from MFL...")
-            players = self.mfl_client.get_players()
-            logger.info(f"Successfully fetched {len(players)} players from MFL")
-            return players
-        except Exception as e:
-            logger.error(f"Failed to fetch MFL players: {e}")
-            return []
-    
-    def create_player_mapping(self) -> Dict[str, PlayerInfo]:
-        """Create comprehensive player ID mapping"""
+    def create_player_mapping(self, sleeper_players: Dict[str, Dict[str, Any]] = None, 
+                            mfl_players: List[Dict[str, Any]] = None) -> Dict[str, PlayerInfo]:
+        """Create comprehensive player ID mapping from provided data"""
         logger.info("Creating player ID mapping...")
         
-        # Fetch players from both platforms
-        sleeper_players = self.fetch_sleeper_players()
-        mfl_players = self.fetch_mfl_players()
+        # Use provided data or empty defaults
+        sleeper_players = sleeper_players or {}
+        mfl_players = mfl_players or []
         
         player_mapping = {}
         
@@ -195,33 +175,183 @@ class PlayerIDMapper:
         self._player_cache = player_mapping
         return player_mapping
     
-    def get_canonical_id(self, sleeper_id: str = None, mfl_id: str = None) -> Optional[str]:
-        """Get canonical ID for a player given platform-specific ID"""
-        if not self._player_cache:
-            self.create_player_mapping()
+    def get_canonical_id(self, sleeper_id: str = None, mfl_id: str = None, 
+                       name: str = None, position: str = None, team: str = None) -> Optional[str]:
+        """Get canonical ID for a player given platform-specific ID or attributes"""
+        # First try to find from internal mappings
+        if sleeper_id and sleeper_id in self.sleeper_to_canonical:
+            return self.sleeper_to_canonical[sleeper_id]
         
-        for canonical_id, player_info in self._player_cache.items():
-            if sleeper_id and player_info.sleeper_id == sleeper_id:
-                return canonical_id
-            if mfl_id and player_info.mfl_id == mfl_id:
-                return canonical_id
+        if mfl_id and mfl_id in self.mfl_to_canonical:
+            return self.mfl_to_canonical[mfl_id]
+        
+        # Try to find from database
+        try:
+            db = SessionLocal()
+            try:
+                if sleeper_id:
+                    player = db.query(Player).filter(Player.sleeper_id == sleeper_id).first()
+                    if player:
+                        self.sleeper_to_canonical[sleeper_id] = player.nfl_id
+                        return player.nfl_id
+                
+                if mfl_id:
+                    player = db.query(Player).filter(Player.mfl_id == mfl_id).first()
+                    if player:
+                        self.mfl_to_canonical[mfl_id] = player.nfl_id
+                        return player.nfl_id
+                
+                # If name, position, team provided, generate canonical ID
+                if name and position and team:
+                    return self.generate_canonical_id(name, position, team)
+                    
+            finally:
+                db.close()
+        except Exception as e:
+            logger.error(f"Database error in get_canonical_id: {e}")
         
         return None
     
     def get_player_info(self, canonical_id: str) -> Optional[PlayerInfo]:
         """Get player information by canonical ID"""
-        if not self._player_cache:
-            self.create_player_mapping()
+        # Check cache first
+        if canonical_id in self.id_mappings:
+            return self.id_mappings[canonical_id]
         
-        return self._player_cache.get(canonical_id)
+        # Try database
+        try:
+            db = SessionLocal()
+            try:
+                player = db.query(Player).filter(Player.nfl_id == canonical_id).first()
+                if player:
+                    player_info = PlayerInfo(
+                        canonical_id=player.nfl_id,
+                        name=player.name,
+                        position=player.position,
+                        team=player.team,
+                        sleeper_id=player.sleeper_id,
+                        mfl_id=player.mfl_id
+                    )
+                    self.id_mappings[canonical_id] = player_info
+                    return player_info
+            finally:
+                db.close()
+        except Exception as e:
+            logger.error(f"Database error in get_player_info: {e}")
+        
+        return None
     
-    def sync_players_to_database(self) -> bool:
+    def add_player_mapping(self, player_info: PlayerInfo) -> Optional[str]:
+        """Add a player mapping to the database"""
+        try:
+            # Generate canonical ID if not provided
+            canonical_id = self.generate_canonical_id(
+                player_info.name, 
+                player_info.position, 
+                player_info.team
+            )
+            
+            db = SessionLocal()
+            try:
+                # Check if player already exists
+                existing_player = db.query(Player).filter(
+                    Player.nfl_id == canonical_id
+                ).first()
+                
+                if existing_player:
+                    # Update existing player
+                    if player_info.sleeper_id:
+                        existing_player.sleeper_id = player_info.sleeper_id
+                    if player_info.mfl_id:
+                        existing_player.mfl_id = player_info.mfl_id
+                    db.commit()
+                    logger.debug(f"Updated existing player: {player_info.name}")
+                else:
+                    # Create new player
+                    player = Player(
+                        nfl_id=canonical_id,
+                        sleeper_id=player_info.sleeper_id,
+                        mfl_id=player_info.mfl_id,
+                        name=player_info.name,
+                        position=player_info.position,
+                        team=player_info.team,
+                        is_starter=self._is_starter_position(player_info.position)
+                    )
+                    db.add(player)
+                    db.commit()
+                    logger.debug(f"Added new player: {player_info.name}")
+                
+                # Update internal mappings
+                self.id_mappings[canonical_id] = player_info
+                if player_info.sleeper_id:
+                    self.sleeper_to_canonical[player_info.sleeper_id] = canonical_id
+                if player_info.mfl_id:
+                    self.mfl_to_canonical[player_info.mfl_id] = canonical_id
+                
+                return canonical_id
+                
+            finally:
+                db.close()
+                
+        except Exception as e:
+            logger.error(f"Failed to add player mapping: {e}")
+            return None
+    
+    def load_from_database(self):
+        """Load all player mappings from database"""
+        try:
+            db = SessionLocal()
+            try:
+                players = db.query(Player).all()
+                
+                for player in players:
+                    player_info = PlayerInfo(
+                        canonical_id=player.nfl_id,
+                        name=player.name,
+                        position=player.position,
+                        team=player.team,
+                        sleeper_id=player.sleeper_id,
+                        mfl_id=player.mfl_id
+                    )
+                    
+                    self.id_mappings[player.nfl_id] = player_info
+                    if player.sleeper_id:
+                        self.sleeper_to_canonical[player.sleeper_id] = player.nfl_id
+                    if player.mfl_id:
+                        self.mfl_to_canonical[player.mfl_id] = player.nfl_id
+                
+                logger.info(f"Loaded {len(players)} players from database")
+                
+            finally:
+                db.close()
+                
+        except Exception as e:
+            logger.error(f"Failed to load players from database: {e}")
+    
+    def get_mapping_stats(self) -> Dict[str, Any]:
+        """Get statistics about current mappings"""
+        return {
+            "total_players": len(self.id_mappings),
+            "sleeper_mappings": len(self.sleeper_to_canonical),
+            "mfl_mappings": len(self.mfl_to_canonical),
+            "cross_platform_mappings": len([
+                pid for pid, info in self.id_mappings.items() 
+                if info.sleeper_id and info.mfl_id
+            ])
+        }
+    
+    def sync_players_to_database(self, sleeper_players: Dict[str, Dict[str, Any]] = None, 
+                               mfl_players: List[Dict[str, Any]] = None) -> bool:
         """Sync player mappings to database"""
         try:
             logger.info("Syncing player mappings to database...")
             
-            if not self._player_cache:
-                self.create_player_mapping()
+            # Create mapping if data provided, otherwise use existing cache
+            if sleeper_players or mfl_players:
+                self.create_player_mapping(sleeper_players, mfl_players)
+            elif not self._player_cache:
+                logger.warning("No player data available for database sync")
+                return False
             
             db = SessionLocal()
             try:
@@ -305,20 +435,31 @@ class PlayerIDMapper:
         return stats
 
 # Convenience functions for easy usage
-def create_player_mapping() -> Dict[str, PlayerInfo]:
+def create_player_mapping(sleeper_players: Dict[str, Dict[str, Any]] = None, 
+                        mfl_players: List[Dict[str, Any]] = None) -> Dict[str, PlayerInfo]:
     """Create and return player ID mapping"""
     mapper = PlayerIDMapper()
-    return mapper.create_player_mapping()
+    return mapper.create_player_mapping(sleeper_players, mfl_players)
 
-def get_canonical_id(sleeper_id: str = None, mfl_id: str = None) -> Optional[str]:
+def get_canonical_id(sleeper_id: str = None, mfl_id: str = None, 
+                   name: str = None, position: str = None, team: str = None) -> Optional[str]:
     """Get canonical ID for a player"""
     mapper = PlayerIDMapper()
-    return mapper.get_canonical_id(sleeper_id=sleeper_id, mfl_id=mfl_id)
+    return mapper.get_canonical_id(sleeper_id=sleeper_id, mfl_id=mfl_id, 
+                                 name=name, position=position, team=team)
 
-def sync_players_to_database() -> bool:
-    """Sync all player mappings to database"""
+def sync_players_to_database(sleeper_players: Dict[str, Dict[str, Any]] = None, 
+                           mfl_players: List[Dict[str, Any]] = None) -> int:
+    """Sync player mappings to database with provided data"""
     mapper = PlayerIDMapper()
-    return mapper.sync_players_to_database()
+    
+    # If no data provided, we can't sync
+    if not sleeper_players and not mfl_players:
+        mapper.load_from_database()  # Load existing data
+        return len(mapper.id_mappings)
+    
+    success = mapper.sync_players_to_database(sleeper_players, mfl_players)
+    return len(mapper.id_mappings) if success else 0
 
 # Testing function
 def test_player_mapping():

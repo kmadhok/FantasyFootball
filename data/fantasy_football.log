@@ -6,3 +6,227 @@
 2025-07-17 13:53:02,091 - __main__ - INFO - Successfully fetched 13 users from Sleeper
 2025-07-17 13:53:02,094 - __main__ - INFO - Fetching MFL rosters for league 73756
 2025-07-17 13:53:02,819 - __main__ - INFO - Successfully fetched 24 rosters from MFL
+2025-07-19 23:43:52,165 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-07-19 23:43:52,165 - src.config.config - WARNING - Reddit API not configured - Reddit news monitoring disabled
+2025-07-19 23:43:52,165 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-07-19 23:43:52,165 - src.config.config - INFO - Configuration validation completed successfully
+2025-07-19 23:43:57,640 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-07-19 23:43:57,640 - src.config.config - WARNING - Reddit API not configured - Reddit news monitoring disabled
+2025-07-19 23:43:57,640 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-07-19 23:43:57,640 - src.config.config - INFO - Configuration validation completed successfully
+2025-07-20 00:20:23,456 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-07-20 00:20:23,456 - src.config.config - WARNING - Reddit API not configured - Reddit news monitoring disabled
+2025-07-20 00:20:23,456 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-07-20 00:20:23,456 - src.config.config - INFO - Configuration validation completed successfully
+2025-07-20 00:20:41,260 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-07-20 00:20:41,261 - src.config.config - WARNING - Reddit API not configured - Reddit news monitoring disabled
+2025-07-20 00:20:41,261 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-07-20 00:20:41,261 - src.config.config - INFO - Configuration validation completed successfully
+2025-07-20 00:20:46,439 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-07-20 00:20:46,439 - src.config.config - WARNING - Reddit API not configured - Reddit news monitoring disabled
+2025-07-20 00:20:46,439 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-07-20 00:20:46,439 - src.config.config - INFO - Configuration validation completed successfully
+2025-07-20 00:20:52,844 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-07-20 00:20:52,845 - src.config.config - WARNING - Reddit API not configured - Reddit news monitoring disabled
+2025-07-20 00:20:52,845 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-07-20 00:20:52,845 - src.config.config - INFO - Configuration validation completed successfully
+2025-07-20 00:20:58,662 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-07-20 00:20:58,662 - src.config.config - WARNING - Reddit API not configured - Reddit news monitoring disabled
+2025-07-20 00:20:58,662 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-07-20 00:20:58,662 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-04 09:09:44,830 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-04 09:09:44,830 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-04 09:09:44,830 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-04 09:09:49,637 - __main__ - INFO - Successfully fetched 12 rosters from Sleeper
+2025-09-04 09:09:50,173 - __main__ - INFO - Successfully fetched 12 users from Sleeper
+2025-09-04 09:09:50,174 - __main__ - INFO - Fetching MFL rosters for league 73756
+2025-09-04 09:09:52,322 - __main__ - INFO - Successfully fetched 24 rosters from MFL
+2025-09-04 09:09:52,351 - src.database.roster_storage - ERROR - Failed to get roster statistics: (sqlite3.OperationalError) no such table: roster_entries
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT roster_entries.id AS roster_entries_id, roster_entries.player_id AS roster_entries_player_id, roster_entries.platform AS roster_entries_platform, roster_entries.league_id AS roster_entries_league_id, roster_entries.user_id AS roster_entries_user_id, roster_entries.roster_slot AS roster_entries_roster_slot, roster_entries.is_active AS roster_entries_is_active, roster_entries.created_at AS roster_entries_created_at, roster_entries.updated_at AS roster_entries_updated_at 
+FROM roster_entries 
+WHERE roster_entries.is_active = 1) AS anon_1]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-04 09:09:52,351 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-04 09:09:52,351 - src.utils.player_id_mapper - INFO - Created mapping for 0 players
+2025-09-04 09:09:52,353 - src.database.roster_storage - ERROR - Failed to get roster changes: (sqlite3.OperationalError) no such table: roster_entries
+[SQL: SELECT roster_entries.id AS roster_entries_id, roster_entries.player_id AS roster_entries_player_id, roster_entries.platform AS roster_entries_platform, roster_entries.league_id AS roster_entries_league_id, roster_entries.user_id AS roster_entries_user_id, roster_entries.roster_slot AS roster_entries_roster_slot, roster_entries.is_active AS roster_entries_is_active, roster_entries.created_at AS roster_entries_created_at, roster_entries.updated_at AS roster_entries_updated_at, players.id AS players_id, players.nfl_id AS players_nfl_id, players.sleeper_id AS players_sleeper_id, players.mfl_id AS players_mfl_id, players.name AS players_name, players.position AS players_position, players.team AS players_team, players.depth_chart_position AS players_depth_chart_position, players.is_starter AS players_is_starter, players.created_at AS players_created_at, players.updated_at AS players_updated_at 
+FROM roster_entries JOIN players ON players.id = roster_entries.player_id 
+WHERE roster_entries.created_at >= ? ORDER BY roster_entries.created_at DESC]
+[parameters: ('2025-09-03 00:09:52.351791',)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-04 09:09:52,353 - src.database.roster_storage - ERROR - Failed to get waiver states: type object 'WaiverState' has no attribute 'last_updated'
+2025-09-04 09:09:52,353 - src.database.roster_storage - ERROR - Failed to get waiver states: type object 'WaiverState' has no attribute 'last_updated'
+2025-09-04 09:09:52,355 - src.database.roster_storage - ERROR - Failed to validate data integrity: (sqlite3.OperationalError) no such table: roster_entries
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT roster_entries.id AS roster_entries_id, roster_entries.player_id AS roster_entries_player_id, roster_entries.platform AS roster_entries_platform, roster_entries.league_id AS roster_entries_league_id, roster_entries.user_id AS roster_entries_user_id, roster_entries.roster_slot AS roster_entries_roster_slot, roster_entries.is_active AS roster_entries_is_active, roster_entries.created_at AS roster_entries_created_at, roster_entries.updated_at AS roster_entries_updated_at 
+FROM roster_entries 
+WHERE (roster_entries.player_id NOT IN (SELECT players.id 
+FROM players))) AS anon_1]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-04 09:09:52,357 - __main__ - ERROR - Failed to validate sync data: (sqlite3.OperationalError) no such table: players
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT players.id AS players_id, players.nfl_id AS players_nfl_id, players.sleeper_id AS players_sleeper_id, players.mfl_id AS players_mfl_id, players.name AS players_name, players.position AS players_position, players.team AS players_team, players.depth_chart_position AS players_depth_chart_position, players.is_starter AS players_is_starter, players.created_at AS players_created_at, players.updated_at AS players_updated_at 
+FROM players 
+WHERE (players.id NOT IN (SELECT roster_entries.player_id 
+FROM roster_entries 
+WHERE roster_entries.is_active = 1))) AS anon_1]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-04 09:09:52,357 - src.database.roster_storage - ERROR - Failed to get roster statistics: (sqlite3.OperationalError) no such table: roster_entries
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT roster_entries.id AS roster_entries_id, roster_entries.player_id AS roster_entries_player_id, roster_entries.platform AS roster_entries_platform, roster_entries.league_id AS roster_entries_league_id, roster_entries.user_id AS roster_entries_user_id, roster_entries.roster_slot AS roster_entries_roster_slot, roster_entries.is_active AS roster_entries_is_active, roster_entries.created_at AS roster_entries_created_at, roster_entries.updated_at AS roster_entries_updated_at 
+FROM roster_entries 
+WHERE roster_entries.is_active = 1) AS anon_1]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-04 09:09:57,288 - __main__ - INFO - Starting Sleeper roster sync with error handling...
+2025-09-04 09:09:57,850 - __main__ - INFO - Successfully fetched 12 rosters from Sleeper
+2025-09-04 09:09:58,959 - __main__ - INFO - Successfully fetched 12 users from Sleeper
+2025-09-04 09:09:58,963 - __main__ - ERROR - Database error during Sleeper roster sync: (sqlite3.OperationalError) no such table: roster_entries
+[SQL: DELETE FROM roster_entries WHERE roster_entries.platform = ?]
+[parameters: ('sleeper',)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-04 09:09:58,963 - __main__ - ERROR - Failed to sync Sleeper rosters: (sqlite3.OperationalError) no such table: roster_entries
+[SQL: DELETE FROM roster_entries WHERE roster_entries.platform = ?]
+[parameters: ('sleeper',)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-04 09:09:58,963 - __main__ - INFO - Starting MFL roster sync with error handling...
+2025-09-04 09:09:58,963 - __main__ - INFO - Fetching MFL rosters for league 73756
+2025-09-04 09:10:00,171 - __main__ - INFO - Successfully fetched 24 rosters from MFL
+2025-09-04 09:10:00,175 - __main__ - ERROR - Database error during MFL roster sync: (sqlite3.OperationalError) no such table: roster_entries
+[SQL: DELETE FROM roster_entries WHERE roster_entries.platform = ?]
+[parameters: ('mfl',)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-04 09:10:00,175 - __main__ - ERROR - Failed to sync MFL rosters: (sqlite3.OperationalError) no such table: roster_entries
+[SQL: DELETE FROM roster_entries WHERE roster_entries.platform = ?]
+[parameters: ('mfl',)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-04 09:10:13,961 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-04 09:10:13,961 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-04 09:10:13,961 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-04 09:10:14,169 - __main__ - INFO - Initializing database...
+2025-09-04 09:10:14,177 - __main__ - INFO - Database tables created successfully
+2025-09-04 09:10:14,177 - __main__ - INFO - Running database migrations...
+2025-09-04 09:10:14,181 - __main__ - INFO - Database indexes created successfully
+2025-09-04 09:10:14,188 - __main__ - INFO - Cleaned up 0 old deduplication logs
+2025-09-04 09:10:14,188 - __main__ - INFO - Database migrations completed
+2025-09-04 09:10:14,188 - __main__ - INFO - Database initialization complete
+2025-09-04 10:58:46,294 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-04 10:58:46,295 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-04 10:58:46,295 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-04 10:58:49,171 - __main__ - INFO - Successfully fetched 12 rosters from Sleeper
+2025-09-04 10:58:49,697 - __main__ - INFO - Successfully fetched 12 users from Sleeper
+2025-09-04 10:58:49,699 - __main__ - INFO - Fetching MFL rosters for league 73756
+2025-09-04 10:58:50,890 - __main__ - INFO - Successfully fetched 24 rosters from MFL
+2025-09-04 10:58:50,925 - src.database.roster_storage - INFO - Generated roster statistics: 0 total entries
+2025-09-04 10:58:50,925 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-04 10:58:50,925 - src.utils.player_id_mapper - INFO - Created mapping for 0 players
+2025-09-04 10:58:50,928 - src.database.roster_storage - INFO - Retrieved 0 roster changes from last 24 hours
+2025-09-04 10:58:50,928 - src.database.roster_storage - ERROR - Failed to get waiver states: type object 'WaiverState' has no attribute 'last_updated'
+2025-09-04 10:58:50,928 - src.database.roster_storage - ERROR - Failed to get waiver states: type object 'WaiverState' has no attribute 'last_updated'
+2025-09-04 10:58:50,935 - src.database.roster_storage - INFO - Data integrity check completed: 0 issues found
+2025-09-04 10:58:50,943 - src.database.roster_storage - INFO - Generated roster statistics: 0 total entries
+2025-09-04 10:58:52,523 - __main__ - INFO - Starting Sleeper roster sync with error handling...
+2025-09-04 10:58:52,984 - __main__ - INFO - Successfully fetched 12 rosters from Sleeper
+2025-09-04 10:58:53,509 - __main__ - INFO - Successfully fetched 12 users from Sleeper
+2025-09-04 10:58:53,513 - __main__ - INFO - Processing roster for user_847307020301361152 with 15 players
+2025-09-04 10:58:53,534 - __main__ - INFO - Processing roster for user_728452958819348480 with 15 players
+2025-09-04 10:58:53,547 - __main__ - INFO - Processing roster for user_639248377158139904 with 16 players
+2025-09-04 10:58:53,560 - __main__ - INFO - Processing roster for user_862224719615770624 with 16 players
+2025-09-04 10:58:53,570 - __main__ - INFO - Processing roster for user_862347851106197504 with 15 players
+2025-09-04 10:58:53,580 - __main__ - INFO - Processing roster for user_862350761990959104 with 15 players
+2025-09-04 10:58:53,589 - __main__ - INFO - Processing roster for user_862350775882452992 with 15 players
+2025-09-04 10:58:53,597 - __main__ - INFO - Processing roster for user_862352168672399360 with 15 players
+2025-09-04 10:58:53,605 - __main__ - INFO - Processing roster for user_866184397953585152 with 17 players
+2025-09-04 10:58:53,613 - __main__ - INFO - Processing roster for user_869329176342204416 with 15 players
+2025-09-04 10:58:53,620 - __main__ - INFO - Processing roster for user_869485306439704576 with 15 players
+2025-09-04 10:58:53,628 - __main__ - INFO - Processing roster for user_870053621499387904 with 15 players
+2025-09-04 10:58:53,637 - __main__ - INFO - Sleeper roster sync completed successfully
+2025-09-04 10:58:53,637 - __main__ - INFO - Starting MFL roster sync with error handling...
+2025-09-04 10:58:53,637 - __main__ - INFO - Fetching MFL rosters for league 73756
+2025-09-04 10:58:54,927 - __main__ - INFO - Successfully fetched 24 rosters from MFL
+2025-09-04 10:58:54,931 - __main__ - INFO - Processing roster for Franchise_0001 with 15 players
+2025-09-04 10:58:54,949 - __main__ - INFO - Processing roster for Franchise_0002 with 14 players
+2025-09-04 10:58:54,962 - __main__ - INFO - Processing roster for Franchise_0003 with 15 players
+2025-09-04 10:58:54,975 - __main__ - INFO - Processing roster for Franchise_0004 with 15 players
+2025-09-04 10:58:54,985 - __main__ - INFO - Processing roster for Franchise_0005 with 15 players
+2025-09-04 10:58:54,994 - __main__ - INFO - Processing roster for Franchise_0006 with 15 players
+2025-09-04 10:58:55,003 - __main__ - INFO - Processing roster for Franchise_0007 with 15 players
+2025-09-04 10:58:55,011 - __main__ - INFO - Processing roster for Franchise_0008 with 15 players
+2025-09-04 10:58:55,017 - __main__ - INFO - Processing roster for Franchise_0009 with 15 players
+2025-09-04 10:58:55,024 - __main__ - INFO - Processing roster for Franchise_0010 with 15 players
+2025-09-04 10:58:55,030 - __main__ - INFO - Processing roster for Franchise_0011 with 15 players
+2025-09-04 10:58:55,037 - __main__ - INFO - Processing roster for Franchise_0012 with 15 players
+2025-09-04 10:58:55,043 - __main__ - INFO - Processing roster for Franchise_0013 with 15 players
+2025-09-04 10:58:55,049 - __main__ - INFO - Processing roster for Franchise_0014 with 15 players
+2025-09-04 10:58:55,056 - __main__ - INFO - Processing roster for Franchise_0015 with 15 players
+2025-09-04 10:58:55,061 - __main__ - INFO - Processing roster for Franchise_0016 with 15 players
+2025-09-04 10:58:55,067 - __main__ - INFO - Processing roster for Franchise_0017 with 15 players
+2025-09-04 10:58:55,073 - __main__ - INFO - Processing roster for Franchise_0018 with 15 players
+2025-09-04 10:58:55,080 - __main__ - INFO - Processing roster for Franchise_0019 with 15 players
+2025-09-04 10:58:55,087 - __main__ - INFO - Processing roster for Franchise_0020 with 15 players
+2025-09-04 10:58:55,099 - __main__ - INFO - Processing roster for Franchise_0021 with 15 players
+2025-09-04 10:58:55,104 - __main__ - INFO - Processing roster for Franchise_0022 with 15 players
+2025-09-04 10:58:55,109 - __main__ - INFO - Processing roster for Franchise_0023 with 15 players
+2025-09-04 10:58:55,114 - __main__ - INFO - Processing roster for Franchise_0024 with 15 players
+2025-09-04 10:58:55,119 - __main__ - INFO - MFL roster sync completed successfully
+2025-09-04 11:20:18,789 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-04 11:20:18,789 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-04 11:20:18,789 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-04 11:20:21,861 - __main__ - INFO - Successfully fetched 12 rosters from Sleeper
+2025-09-04 11:20:22,515 - __main__ - INFO - Successfully fetched 12 users from Sleeper
+2025-09-04 11:20:22,518 - __main__ - INFO - Fetching MFL rosters for league 73756
+2025-09-04 11:20:23,861 - __main__ - INFO - Successfully fetched 24 rosters from MFL
+2025-09-04 11:20:23,863 - __main__ - INFO - Fetching MFL rosters for league 73756
+2025-09-04 11:20:25,114 - __main__ - INFO - Successfully fetched 24 rosters from MFL
+2025-09-04 11:20:25,152 - src.database.roster_storage - INFO - Generated roster statistics: 543 total entries
+2025-09-04 11:20:25,152 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-04 11:20:25,152 - src.utils.player_id_mapper - INFO - Created mapping for 0 players
+2025-09-04 11:20:25,162 - src.database.roster_storage - INFO - Retrieved 543 roster changes from last 24 hours
+2025-09-04 11:20:25,162 - src.database.roster_storage - ERROR - Failed to get waiver states: type object 'WaiverState' has no attribute 'last_updated'
+2025-09-04 11:20:25,162 - src.database.roster_storage - ERROR - Failed to get waiver states: type object 'WaiverState' has no attribute 'last_updated'
+2025-09-04 11:20:25,166 - src.database.roster_storage - INFO - Data integrity check completed: 0 issues found
+2025-09-04 11:20:25,171 - src.database.roster_storage - INFO - Generated roster statistics: 543 total entries
+2025-09-04 11:20:27,010 - __main__ - INFO - Starting Sleeper roster sync with error handling...
+2025-09-04 11:20:27,599 - __main__ - INFO - Successfully fetched 12 rosters from Sleeper
+2025-09-04 11:20:28,111 - __main__ - INFO - Successfully fetched 12 users from Sleeper
+2025-09-04 11:20:28,116 - __main__ - INFO - Processing roster for user_847307020301361152 with 15 players
+2025-09-04 11:20:28,127 - __main__ - INFO - Processing roster for user_728452958819348480 with 15 players
+2025-09-04 11:20:28,134 - __main__ - INFO - Processing roster for user_639248377158139904 with 16 players
+2025-09-04 11:20:28,141 - __main__ - INFO - Processing roster for user_862224719615770624 with 16 players
+2025-09-04 11:20:28,147 - __main__ - INFO - Processing roster for user_862347851106197504 with 15 players
+2025-09-04 11:20:28,153 - __main__ - INFO - Processing roster for user_862350761990959104 with 15 players
+2025-09-04 11:20:28,158 - __main__ - INFO - Processing roster for user_862350775882452992 with 15 players
+2025-09-04 11:20:28,162 - __main__ - INFO - Processing roster for user_862352168672399360 with 15 players
+2025-09-04 11:20:28,167 - __main__ - INFO - Processing roster for user_866184397953585152 with 17 players
+2025-09-04 11:20:28,172 - __main__ - INFO - Processing roster for user_869329176342204416 with 15 players
+2025-09-04 11:20:28,176 - __main__ - INFO - Processing roster for user_869485306439704576 with 15 players
+2025-09-04 11:20:28,180 - __main__ - INFO - Processing roster for user_870053621499387904 with 15 players
+2025-09-04 11:20:28,191 - __main__ - INFO - Sleeper roster sync completed successfully
+2025-09-04 11:20:28,191 - __main__ - INFO - Starting MFL roster sync with error handling...
+2025-09-04 11:20:28,191 - __main__ - INFO - Fetching MFL rosters for league 73756
+2025-09-04 11:20:29,508 - __main__ - INFO - Successfully fetched 24 rosters from MFL
+2025-09-04 11:20:29,515 - __main__ - INFO - Processing roster for Franchise_0001 with 15 players
+2025-09-04 11:20:29,527 - __main__ - INFO - Processing roster for Franchise_0002 with 14 players
+2025-09-04 11:20:29,534 - __main__ - INFO - Processing roster for Franchise_0003 with 15 players
+2025-09-04 11:20:29,540 - __main__ - INFO - Processing roster for Franchise_0004 with 15 players
+2025-09-04 11:20:29,546 - __main__ - INFO - Processing roster for Franchise_0005 with 15 players
+2025-09-04 11:20:29,551 - __main__ - INFO - Processing roster for Franchise_0006 with 15 players
+2025-09-04 11:20:29,556 - __main__ - INFO - Processing roster for Franchise_0007 with 15 players
+2025-09-04 11:20:29,560 - __main__ - INFO - Processing roster for Franchise_0008 with 15 players
+2025-09-04 11:20:29,564 - __main__ - INFO - Processing roster for Franchise_0009 with 15 players
+2025-09-04 11:20:29,567 - __main__ - INFO - Processing roster for Franchise_0010 with 15 players
+2025-09-04 11:20:29,571 - __main__ - INFO - Processing roster for Franchise_0011 with 15 players
+2025-09-04 11:20:29,574 - __main__ - INFO - Processing roster for Franchise_0012 with 15 players
+2025-09-04 11:20:29,577 - __main__ - INFO - Processing roster for Franchise_0013 with 15 players
+2025-09-04 11:20:29,580 - __main__ - INFO - Processing roster for Franchise_0014 with 15 players
+2025-09-04 11:20:29,583 - __main__ - INFO - Processing roster for Franchise_0015 with 15 players
+2025-09-04 11:20:29,586 - __main__ - INFO - Processing roster for Franchise_0016 with 15 players
+2025-09-04 11:20:29,589 - __main__ - INFO - Processing roster for Franchise_0017 with 15 players
+2025-09-04 11:20:29,591 - __main__ - INFO - Processing roster for Franchise_0018 with 15 players
+2025-09-04 11:20:29,594 - __main__ - INFO - Processing roster for Franchise_0019 with 15 players
+2025-09-04 11:20:29,596 - __main__ - INFO - Processing roster for Franchise_0020 with 15 players
+2025-09-04 11:20:29,598 - __main__ - INFO - Processing roster for Franchise_0021 with 15 players
+2025-09-04 11:20:29,600 - __main__ - INFO - Processing roster for Franchise_0022 with 15 players
+2025-09-04 11:20:29,602 - __main__ - INFO - Processing roster for Franchise_0023 with 15 players
+2025-09-04 11:20:29,604 - __main__ - INFO - Processing roster for Franchise_0024 with 15 players
+2025-09-04 11:20:29,615 - __main__ - INFO - MFL roster sync completed successfully

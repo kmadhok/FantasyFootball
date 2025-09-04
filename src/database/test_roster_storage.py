@@ -45,7 +45,7 @@ class TestRosterStorageService:
             }
         ]
         
-        result = storage_service.store_roster_entries(roster_entries)
+        result = storage_service.store_roster_entries(roster_entries, "sleeper")
         
         assert result is True
         assert mock_db.add.call_count == 2
@@ -72,7 +72,7 @@ class TestRosterStorageService:
             }
         ]
         
-        result = storage_service.store_roster_entries(roster_entries)
+        result = storage_service.store_roster_entries(roster_entries, "sleeper")
         
         assert result is False
         mock_db.rollback.assert_called_once()
@@ -347,7 +347,7 @@ class TestUtilityFunctions:
         result = store_roster_data(roster_entries)
         
         assert result is True
-        mock_service.store_roster_entries.assert_called_once_with(roster_entries)
+        mock_service.store_roster_entries.assert_called_once_with(roster_entries, "sleeper")
     
     @patch('src.database.roster_storage.get_storage_service')
     def test_get_user_roster(self, mock_get_service):
@@ -407,7 +407,7 @@ class TestRosterStorageIntegration:
         ]
         
         # Store data
-        store_result = service.store_roster_entries(roster_entries)
+        store_result = service.store_roster_entries(roster_entries, "sleeper")
         assert store_result is True
         
         # Get statistics
@@ -444,7 +444,7 @@ class TestRosterStorageEdgeCases:
         mock_db = Mock()
         mock_session.return_value = mock_db
         
-        result = storage_service.store_roster_entries([])
+        result = storage_service.store_roster_entries([], "sleeper")
         
         assert result is True
         mock_db.add.assert_not_called()
@@ -500,7 +500,7 @@ class TestRosterStorageEdgeCases:
             }
         ]
         
-        result = storage_service.store_roster_entries(invalid_entries)
+        result = storage_service.store_roster_entries(invalid_entries, "sleeper")
         
         assert result is False
         mock_db.rollback.assert_called_once()

@@ -701,6 +701,156 @@ def test_storage_integration():
         print(f"   ✗ Storage integration test failed: {e}")
         return False
 
+def find_mfl_roster_by_team_name(team_name: str) -> Dict[str, Any]:
+    """Find a specific MFL roster by team name"""
+    print(f"Searching for MFL roster: '{team_name}'...")
+    print("=" * 60)
+    
+    mfl_client = MFLAPIClient()
+    
+    try:
+        # Get all rosters
+        rosters = mfl_client.get_rosters()
+        print(f"Retrieved {len(rosters)} rosters from MFL")
+        
+        # Search for the team
+        target_roster = None
+        
+        print(f"\nSearching through rosters:")
+        for roster in rosters:
+            franchise_id = roster.get("id")
+            franchise_name = roster.get("name", f"Franchise_{franchise_id}")
+            
+            print(f"  - Checking: {franchise_name} (ID: {franchise_id})")
+            
+            # Case-insensitive search for team name
+            if team_name.lower() in franchise_name.lower():
+                target_roster = roster
+                print(f"  ✅ FOUND MATCH: {franchise_name}")
+                break
+        
+        if not target_roster:
+            print(f"\n❌ Team '{team_name}' not found in MFL league")
+            print("Available teams:")
+            for roster in rosters:
+                franchise_name = roster.get("name", f"Franchise_{roster.get('id', 'Unknown')}")
+                print(f"  - {franchise_name}")
+            return {}
+        
+        # Extract roster details
+        franchise_id = target_roster.get("id")
+        franchise_name = target_roster.get("name")
+        player_data = target_roster.get("player", [])
+        
+        # Handle player data structure
+        if not isinstance(player_data, list):
+            player_data = [player_data] if player_data else []
+        
+        print(f"\n🏈 ROSTER DETAILS FOR {franchise_name.upper()}")
+        print("=" * 60)
+        print(f"Franchise ID: {franchise_id}")
+        print(f"Team Name: {franchise_name}")
+        print(f"Total Players: {len(player_data)}")
+        
+        if player_data:
+            print(f"\nPlayer IDs:")
+            for i, player_info in enumerate(player_data, 1):
+                player_id = player_info.get("id", "Unknown")
+                player_status = player_info.get("status", "active")
+                print(f"  {i:2d}. Player ID: {player_id} (Status: {player_status})")
+        else:
+            print("  No players found in roster")
+        
+        return {
+            "franchise_id": franchise_id,
+            "franchise_name": franchise_name,
+            "player_count": len(player_data),
+            "players": player_data,
+            "raw_roster": target_roster
+        }
+        
+    except Exception as e:
+        print(f"❌ Error finding MFL roster: {e}")
+        return {}
+
+def get_mfl_player_details(player_ids: List[str]) -> Dict[str, Dict[str, Any]]:
+    """Get detailed player information from MFL for given player IDs"""
+    print(f"\n🏈 Getting player details for {len(player_ids)} players from MFL...")
+    
+    mfl_client = MFLAPIClient()
+    
+    try:
+        # Get all players from MFL
+        players = mfl_client.get_players()
+        print(f"Retrieved {len(players)} total players from MFL database")
+        
+        # Create player lookup dictionary
+        player_lookup = {}
+        for player in players:
+            player_id = player.get("id")
+            if player_id:
+                player_lookup[player_id] = player
+        
+        # Get details for requested players
+        player_details = {}
+        found_count = 0
+        
+        print(f"\nPlayer Details:")
+        print("-" * 50)
+        
+        for i, player_id in enumerate(player_ids, 1):
+            if player_id in player_lookup:
+                player_data = player_lookup[player_id]
+                name = player_data.get("name", f"Player_{player_id}")
+                position = player_data.get("position", "UNK")
+                team = player_data.get("team", "FA")
+                
+                player_details[player_id] = {
+                    "name": name,
+                    "position": position,
+                    "team": team,
+                    "mfl_data": player_data
+                }
+                
+                print(f"  {i:2d}. {position:3s}: {name:25s} ({team}) [ID: {player_id}]")
+                found_count += 1
+            else:
+                player_details[player_id] = {
+                    "name": f"Unknown_Player_{player_id}",
+                    "position": "UNK",
+                    "team": "FA",
+                    "mfl_data": {}
+                }
+                print(f"  {i:2d}. UNK: Unknown_Player_{player_id:12s} (FA) [ID: {player_id}] - NOT FOUND")
+        
+        print(f"\nSummary: Found details for {found_count}/{len(player_ids)} players")
+        return player_details
+        
+    except Exception as e:
+        print(f"❌ Error getting MFL player details: {e}")
+        return {}
+
+def get_puntersfordays_roster():
+    """Convenience function to get PUNTERSFORDAYS roster specifically"""
+    print("🏈 GETTING PUNTERSFORDAYS MFL ROSTER")
+    print("=" * 60)
+    
+    # Find the roster
+    roster_info = find_mfl_roster_by_team_name("PUNTERSFORDAYS")
+    
+    if not roster_info:
+        return None
+    
+    # Get player details
+    player_data = roster_info.get("players", [])
+    if player_data:
+        player_ids = [p.get("id") for p in player_data if p.get("id")]
+        if player_ids:
+            player_details = get_mfl_player_details(player_ids)
+            roster_info["player_details"] = player_details
+    
+    return roster_info
+
 def test_error_handling():
     """Test error handling and retry logic"""
     print("Testing Error Handling and Retry Logic...")
@@ -768,6 +918,11 @@ if __name__ == "__main__":
     
     # Test roster fetching for both platforms
     test_roster_fetching()
+    
+    print("\n" + "="*60)
+    
+    # Test PUNTERSFORDAYS specific roster
+    get_puntersfordays_roster()
     
     print("\n" + "="*60)
     

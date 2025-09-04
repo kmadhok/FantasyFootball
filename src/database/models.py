@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, Float, ForeignKey, create_engine, Index, UniqueConstraint
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
 import os
 
@@ -159,7 +158,12 @@ class DeduplicationLog(Base):
     expires_at = Column(DateTime, nullable=False)
 
 # Database configuration
-DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///data/fantasy_football.db')
+from ..config import get_database_url, ensure_data_directory
+
+# Ensure data directory exists before creating database
+ensure_data_directory()
+
+DATABASE_URL = get_database_url()
 engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -173,8 +177,20 @@ def get_db():
 
 def create_tables():
     """Create all tables"""
+    # Ensure data directory exists before creating tables
+    ensure_data_directory()
     Base.metadata.create_all(bind=engine)
 
 def drop_tables():
     """Drop all tables (for testing)"""
     Base.metadata.drop_all(bind=engine)
+
+def initialize_database():
+    """Initialize the database by creating all tables if they don't exist"""
+    try:
+        ensure_data_directory()
+        create_tables()
+        return True
+    except Exception as e:
+        print(f"Failed to initialize database: {e}")
+        return False

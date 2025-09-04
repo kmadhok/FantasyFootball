@@ -1,0 +1,64 @@
+FANTASY FOOTBALL API TEST RESULTS
+============================================================
+
+League: SLEEPER League: Sully Dethroned (2024) - 12 teams
+Teams: 13 found
+Rosters: 36 found
+Errors: 1 encountered
+
+Detailed Results:
+League Info: SLEEPER League: Sully Dethroned (2024) - 12 teams
+Teams (13):
+  - SLEEPER Team: Prose4 (ID: 437333129225564160)
+  - SLEEPER Team: smulligan (ID: 639248377158139904)
+  - SLEEPER Team: mmbyars55 (ID: 728452958819348480)
+  - SLEEPER Team: Robby513 (ID: 847307020301361152)
+  - SLEEPER Team: NolanHawley (ID: 862224719615770624)
+  - SLEEPER Team: Matchel (ID: 862347851106197504)
+  - SLEEPER Team: itsdeep (ID: 862350761990959104)
+  - SLEEPER Team: Sully0 (ID: 862350775882452992)
+  - SLEEPER Team: Kanum (ID: 862352168672399360)
+  - SLEEPER Team: TateMaurer (ID: 866184397953585152)
+  - SLEEPER Team: jacobzeidner (ID: 869329176342204416)
+  - SLEEPER Team: Berffmeyer (ID: 869485306439704576)
+  - SLEEPER Team: mitchmcgee13 (ID: 870053621499387904)
+Rosters (36):
+  - SLEEPER Roster - Robby513: 10 starters, 6 bench (16 total)
+  - SLEEPER Roster - mmbyars55: 10 starters, 8 bench (18 total)
+  - SLEEPER Roster - smulligan: 10 starters, 6 bench (16 total)
+  - SLEEPER Roster - NolanHawley: 10 starters, 6 bench (16 total)
+  - SLEEPER Roster - Matchel: 10 starters, 5 bench (15 total)
+  - SLEEPER Roster - itsdeep: 10 starters, 5 bench (15 total)
+  - SLEEPER Roster - Sully0: 10 starters, 7 bench (17 total)
+  - SLEEPER Roster - Kanum: 10 starters, 6 bench (16 total)
+  - SLEEPER Roster - TateMaurer: 10 starters, 5 bench (15 total)
+  - SLEEPER Roster - jacobzeidner: 10 starters, 6 bench (16 total)
+  - SLEEPER Roster - Berffmeyer: 10 starters, 5 bench (15 total)
+  - SLEEPER Roster - mitchmcgee13: 10 starters, 6 bench (16 total)
+  - MFL Roster - Franchise_0001: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0002: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0003: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0004: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0005: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0006: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0007: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0008: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0009: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0010: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0011: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0012: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0013: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0014: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0015: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0016: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0017: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0018: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0019: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0020: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0021: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0022: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0023: 0 starters, 0 bench (0 total)
+  - MFL Roster - Franchise_0024: 0 starters, 0 bench (0 total)
+Waivers/FAAB (0):
+Errors (1):
+  - Sleeper waivers failed: Request failed: 404 Client Error: Not Found for url: https://api.sleeper.app/v1/league/1124820373402046464/waivers

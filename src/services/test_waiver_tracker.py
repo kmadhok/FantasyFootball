@@ -3,7 +3,7 @@ import unittest.mock as mock
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta
 import json
-
+import requests
 from src.services.waiver_tracker import (
     SleeperWaiverClient, MFLWaiverClient, WaiverTrackerService, WaiverInfo,
     test_sleeper_waiver_api, test_mfl_faab_api
