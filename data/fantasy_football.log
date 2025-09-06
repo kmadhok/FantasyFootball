@@ -1100,3 +1100,328 @@ WHERE player_projections.week = ? AND player_projections.season = ?]
 2025-09-06 09:42:40,020 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
 2025-09-06 09:42:40,020 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
 2025-09-06 09:42:40,020 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:05:58,678 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:05:58,678 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:05:58,678 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:06:00,081 - src.utils.player_id_mapper - INFO - Loaded 1944 players from database
+2025-09-06 17:06:00,082 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-06 17:06:00,082 - src.utils.player_id_mapper - INFO - Created mapping for 0 players
+2025-09-06 17:06:12,966 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:06:12,966 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:06:12,966 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:06:13,644 - src.utils.player_id_mapper - INFO - Loaded 1944 players from database
+2025-09-06 17:06:31,141 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:06:31,141 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:06:31,141 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:06:31,950 - src.utils.player_id_mapper - INFO - Loaded 1944 players from database
+2025-09-06 17:06:52,835 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:06:52,835 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:06:52,835 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:07:13,945 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:07:13,945 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:07:13,945 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:07:14,826 - src.utils.player_id_mapper - INFO - Loaded 1944 players from database
+2025-09-06 17:07:14,828 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-06 17:07:14,828 - src.utils.player_id_mapper - INFO - Created mapping for 0 players
+2025-09-06 17:07:14,828 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-06 17:07:14,828 - src.utils.player_id_mapper - INFO - Created mapping for 0 players
+2025-09-06 17:07:14,828 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-06 17:07:14,828 - src.utils.player_id_mapper - INFO - Created mapping for 0 players
+2025-09-06 17:07:38,621 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:07:38,622 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:07:38,622 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:15:24,037 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:15:24,038 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:15:24,038 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:15:24,896 - src.services.player_data_sync - INFO - Starting comprehensive player data sync for Epic A cross-platform unification
+2025-09-06 17:15:24,896 - src.services.player_data_sync - INFO - Fetching all NFL players from Sleeper API...
+2025-09-06 17:15:26,389 - src.services.roster_sync - INFO - Successfully fetched 11400 players from Sleeper
+2025-09-06 17:15:26,390 - src.services.player_data_sync - INFO - ✓ Successfully fetched 11400 players from Sleeper
+2025-09-06 17:15:26,390 - src.services.player_data_sync - INFO - Fetching all NFL players from MFL API...
+2025-09-06 17:15:37,782 - src.services.roster_sync - INFO - Successfully fetched 2650 players from MFL
+2025-09-06 17:15:37,787 - src.services.player_data_sync - INFO - ✓ Successfully fetched 2650 players from MFL
+2025-09-06 17:15:37,788 - src.services.player_data_sync - INFO - Unifying players across platforms using canonical ID mapping...
+2025-09-06 17:15:37,788 - src.utils.player_id_mapper - INFO - Syncing player mappings to database...
+2025-09-06 17:15:37,788 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-06 17:15:37,869 - src.utils.player_id_mapper - INFO - Created mapping for 13911 players
+2025-09-06 17:15:38,718 - src.utils.player_id_mapper - INFO - Successfully synced 13911 players to database
+2025-09-06 17:15:38,725 - src.services.player_data_sync - INFO - ✓ Player unification completed successfully
+2025-09-06 17:15:38,725 - src.services.player_data_sync - INFO -   Total unified players: 13911
+2025-09-06 17:15:38,725 - src.services.player_data_sync - INFO -   Cross-platform matches: 0
+2025-09-06 17:15:38,725 - src.services.player_data_sync - INFO - Player data sync completed in 13.83s - SUCCESS
+2025-09-06 17:15:38,725 - src.services.player_data_sync - INFO -   Platforms synced: Sleeper (11400 players), MFL (2650 players)
+2025-09-06 17:15:38,725 - src.services.player_data_sync - INFO -   Total unified: 13911 players
+2025-09-06 17:15:38,725 - src.services.player_data_sync - INFO -   Cross-platform: 0 matched players
+2025-09-06 17:15:57,247 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:15:57,247 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:15:57,247 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:15:57,806 - src.services.player_data_sync - INFO - Validating Epic A cross-platform player unification...
+2025-09-06 17:15:57,967 - src.utils.player_id_mapper - INFO - Loaded 13911 players from database
+2025-09-06 17:15:57,972 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-06 17:15:57,972 - src.utils.player_id_mapper - INFO - Created mapping for 0 players
+2025-09-06 17:15:57,972 - src.services.player_data_sync - INFO - Cross-platform unification validation completed
+2025-09-06 17:15:57,972 - src.services.player_data_sync - INFO -   Status: NEEDS_IMPROVEMENT
+2025-09-06 17:15:57,972 - src.services.player_data_sync - INFO -   Unified players: 0
+2025-09-06 17:15:57,972 - src.services.player_data_sync - INFO -   Data quality: 38.1%
+2025-09-06 17:16:14,942 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:16:14,942 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:16:14,942 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:17:05,705 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:17:05,706 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:17:05,706 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:17:06,568 - src.services.waiver_candidates_builder - INFO - Building waiver candidates for league epic_a_test_league, week 1
+2025-09-06 17:17:06,568 - src.services.usage_projections_service - INFO - Building waiver candidates data for league epic_a_test_league, week 1
+2025-09-06 17:17:06,725 - src.services.usage_projections_service - INFO - ✓ Built 245 waiver candidates
+2025-09-06 17:17:07,136 - src.services.waiver_candidates_builder - INFO - ✓ Built waiver candidates DataFrame with 245 players
+2025-09-06 17:17:07,137 - src.services.scheduler - INFO - Manual Epic A player data sync triggered
+2025-09-06 17:17:07,137 - src.services.scheduler - INFO - Starting Epic A player data synchronization at 2025-09-06 08:17:07.137846
+2025-09-06 17:17:07,137 - src.services.player_data_sync - INFO - Starting comprehensive player data sync for Epic A cross-platform unification
+2025-09-06 17:17:07,137 - src.services.player_data_sync - INFO - Fetching all NFL players from Sleeper API...
+2025-09-06 17:17:08,479 - src.services.roster_sync - INFO - Successfully fetched 11400 players from Sleeper
+2025-09-06 17:17:08,481 - src.services.player_data_sync - INFO - ✓ Successfully fetched 11400 players from Sleeper
+2025-09-06 17:17:08,481 - src.services.player_data_sync - INFO - Fetching all NFL players from MFL API...
+2025-09-06 17:17:09,795 - src.services.roster_sync - INFO - Successfully fetched 2650 players from MFL
+2025-09-06 17:17:09,797 - src.services.player_data_sync - INFO - ✓ Successfully fetched 2650 players from MFL
+2025-09-06 17:17:09,797 - src.services.player_data_sync - INFO - Unifying players across platforms using canonical ID mapping...
+2025-09-06 17:17:09,797 - src.utils.player_id_mapper - INFO - Syncing player mappings to database...
+2025-09-06 17:17:09,797 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-06 17:17:09,863 - src.utils.player_id_mapper - INFO - Created mapping for 13911 players
+2025-09-06 17:17:10,878 - src.utils.player_id_mapper - INFO - Successfully synced 13911 players to database
+2025-09-06 17:17:10,883 - src.services.player_data_sync - INFO - ✓ Player unification completed successfully
+2025-09-06 17:17:10,883 - src.services.player_data_sync - INFO -   Total unified players: 13911
+2025-09-06 17:17:10,883 - src.services.player_data_sync - INFO -   Cross-platform matches: 0
+2025-09-06 17:17:10,883 - src.services.player_data_sync - INFO - Player data sync completed in 3.75s - SUCCESS
+2025-09-06 17:17:10,883 - src.services.player_data_sync - INFO -   Platforms synced: Sleeper (11400 players), MFL (2650 players)
+2025-09-06 17:17:10,883 - src.services.player_data_sync - INFO -   Total unified: 13911 players
+2025-09-06 17:17:10,883 - src.services.player_data_sync - INFO -   Cross-platform: 0 matched players
+2025-09-06 17:17:10,886 - src.services.scheduler - INFO - Epic A player data sync completed in 3.75s - SUCCESS
+2025-09-06 17:17:10,886 - src.services.scheduler - INFO -   Platforms: Sleeper (11400), MFL (2650) players synced
+2025-09-06 17:17:10,886 - src.services.scheduler - INFO -   Unified database: 13911 total players
+2025-09-06 17:17:10,886 - src.services.scheduler - INFO -   Cross-platform matches: 0
+2025-09-06 17:17:10,886 - src.services.scheduler - WARNING -   ⚠ Epic A cross-platform unification needs improvement
+2025-09-06 17:17:26,053 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:17:26,053 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:17:26,053 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:17:26,428 - __main__ - INFO - Starting comprehensive player data sync for Epic A cross-platform unification
+2025-09-06 17:17:26,428 - __main__ - INFO - Fetching all NFL players from Sleeper API...
+2025-09-06 17:17:27,853 - src.services.roster_sync - INFO - Successfully fetched 11400 players from Sleeper
+2025-09-06 17:17:27,854 - __main__ - INFO - ✓ Successfully fetched 11400 players from Sleeper
+2025-09-06 17:17:27,854 - __main__ - INFO - Fetching all NFL players from MFL API...
+2025-09-06 17:17:29,145 - src.services.roster_sync - INFO - Successfully fetched 2650 players from MFL
+2025-09-06 17:17:29,147 - __main__ - INFO - ✓ Successfully fetched 2650 players from MFL
+2025-09-06 17:17:29,147 - __main__ - INFO - Unifying players across platforms using canonical ID mapping...
+2025-09-06 17:17:29,147 - src.utils.player_id_mapper - INFO - Syncing player mappings to database...
+2025-09-06 17:17:29,147 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-06 17:17:29,216 - src.utils.player_id_mapper - INFO - Created mapping for 13911 players
+2025-09-06 17:17:30,230 - src.utils.player_id_mapper - INFO - Successfully synced 13911 players to database
+2025-09-06 17:17:30,239 - __main__ - INFO - ✓ Player unification completed successfully
+2025-09-06 17:17:30,239 - __main__ - INFO -   Total unified players: 13911
+2025-09-06 17:17:30,239 - __main__ - INFO -   Cross-platform matches: 0
+2025-09-06 17:17:30,239 - __main__ - INFO - Player data sync completed in 3.81s - SUCCESS
+2025-09-06 17:17:30,239 - __main__ - INFO -   Platforms synced: Sleeper (11400 players), MFL (2650 players)
+2025-09-06 17:17:30,239 - __main__ - INFO -   Total unified: 13911 players
+2025-09-06 17:17:30,239 - __main__ - INFO -   Cross-platform: 0 matched players
+2025-09-06 17:17:30,243 - __main__ - INFO - Validating Epic A cross-platform player unification...
+2025-09-06 17:17:30,384 - src.utils.player_id_mapper - INFO - Loaded 13911 players from database
+2025-09-06 17:17:30,392 - __main__ - INFO - Cross-platform unification validation completed
+2025-09-06 17:17:30,392 - __main__ - INFO -   Status: NEEDS_IMPROVEMENT
+2025-09-06 17:17:30,392 - __main__ - INFO -   Unified players: 0
+2025-09-06 17:17:30,392 - __main__ - INFO -   Data quality: 38.1%
+2025-09-06 17:26:46,711 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:26:46,711 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:26:46,711 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:26:47,530 - src.services.player_data_sync - INFO - Starting comprehensive player data sync for Epic A cross-platform unification
+2025-09-06 17:26:47,530 - src.services.player_data_sync - INFO - Fetching all NFL players from Sleeper API...
+2025-09-06 17:26:49,050 - src.services.roster_sync - INFO - Successfully fetched 11400 players from Sleeper
+2025-09-06 17:26:49,051 - src.services.player_data_sync - INFO - ✓ Successfully fetched 11400 players from Sleeper
+2025-09-06 17:26:49,051 - src.services.player_data_sync - INFO - Fetching all NFL players from MFL API...
+2025-09-06 17:26:50,337 - src.services.roster_sync - INFO - Successfully fetched 2650 players from MFL
+2025-09-06 17:26:50,340 - src.services.player_data_sync - INFO - ✓ Successfully fetched 2650 players from MFL
+2025-09-06 17:26:50,340 - src.services.player_data_sync - INFO - Unifying players across platforms using canonical ID mapping...
+2025-09-06 17:26:50,340 - src.utils.player_id_mapper - INFO - Syncing player mappings to database...
+2025-09-06 17:26:50,340 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-06 17:26:50,340 - src.utils.player_id_mapper - INFO - Processing 11400 Sleeper players...
+2025-09-06 17:26:50,437 - src.utils.player_id_mapper - INFO - Processed 11368 Sleeper players, skipped 32
+2025-09-06 17:26:50,437 - src.utils.player_id_mapper - INFO - Processing 2650 MFL players...
+2025-09-06 17:26:50,458 - src.utils.player_id_mapper - INFO - Processed 2578 MFL players, matched 2034, skipped 72
+2025-09-06 17:26:50,458 - src.utils.player_id_mapper - INFO - Created mapping for 11790 players
+2025-09-06 17:26:51,245 - src.utils.player_id_mapper - INFO - Successfully synced 11790 players to database
+2025-09-06 17:26:51,251 - src.services.player_data_sync - INFO - ✓ Player unification completed successfully
+2025-09-06 17:26:51,251 - src.services.player_data_sync - INFO -   Total unified players: 11790
+2025-09-06 17:26:51,251 - src.services.player_data_sync - INFO -   Cross-platform matches: 2032
+2025-09-06 17:26:51,251 - src.services.player_data_sync - INFO - Player data sync completed in 3.72s - SUCCESS
+2025-09-06 17:26:51,251 - src.services.player_data_sync - INFO -   Platforms synced: Sleeper (11400 players), MFL (2650 players)
+2025-09-06 17:26:51,251 - src.services.player_data_sync - INFO -   Total unified: 11790 players
+2025-09-06 17:26:51,251 - src.services.player_data_sync - INFO -   Cross-platform: 2032 matched players
+2025-09-06 17:27:12,212 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:27:12,212 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:27:12,212 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 17:27:12,859 - src.services.player_data_sync - INFO - Validating Epic A cross-platform player unification...
+2025-09-06 17:27:12,982 - src.utils.player_id_mapper - INFO - Loaded 11790 players from database
+2025-09-06 17:27:12,987 - src.utils.player_id_mapper - INFO - Creating player ID mapping...
+2025-09-06 17:27:12,987 - src.utils.player_id_mapper - INFO - Processing 0 Sleeper players...
+2025-09-06 17:27:12,987 - src.utils.player_id_mapper - INFO - Processed 0 Sleeper players, skipped 0
+2025-09-06 17:27:12,987 - src.utils.player_id_mapper - INFO - Processing 0 MFL players...
+2025-09-06 17:27:12,987 - src.utils.player_id_mapper - INFO - Processed 0 MFL players, matched 0, skipped 0
+2025-09-06 17:27:12,987 - src.utils.player_id_mapper - INFO - Created mapping for 0 players
+2025-09-06 17:27:12,987 - src.services.player_data_sync - INFO - Cross-platform unification validation completed
+2025-09-06 17:27:12,987 - src.services.player_data_sync - INFO -   Status: NEEDS_IMPROVEMENT
+2025-09-06 17:27:12,987 - src.services.player_data_sync - INFO -   Unified players: 10
+2025-09-06 17:27:12,987 - src.services.player_data_sync - INFO -   Data quality: 30.7%
+2025-09-06 17:31:46,812 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 17:31:46,812 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 17:31:46,812 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 21:57:21,617 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 21:57:21,617 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 21:57:21,617 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 21:57:22,476 - src.services.player_data_sync - INFO - Starting comprehensive player data sync for Epic A cross-platform unification
+2025-09-06 21:57:22,476 - src.services.player_data_sync - INFO - Fetching all NFL players from Sleeper API...
+2025-09-06 21:57:24,398 - src.services.roster_sync - INFO - Successfully fetched 11400 players from Sleeper
+2025-09-06 21:57:24,399 - src.services.player_data_sync - INFO - ✓ Successfully fetched 11400 players from Sleeper
+2025-09-06 21:57:24,399 - src.services.player_data_sync - INFO - Fetching all NFL players from MFL API...
+2025-09-06 21:57:26,218 - src.services.roster_sync - INFO - Successfully fetched 2650 players from MFL
+2025-09-06 21:57:26,220 - src.services.player_data_sync - INFO - ✓ Successfully fetched 2650 players from MFL
+2025-09-06 21:57:26,220 - src.services.player_data_sync - INFO - Unifying players across platforms using canonical ID mapping...
+2025-09-06 21:57:26,220 - src.utils.player_id_mapper - INFO - Syncing player mappings to database...
+2025-09-06 21:57:26,220 - src.utils.player_id_mapper - INFO - Creating enhanced player ID mapping with layered data strategy...
+2025-09-06 21:57:26,220 - src.utils.player_id_mapper - INFO - LAYER 1: Seeding from nfl_data_py crosswalk...
+2025-09-06 21:57:26,220 - src.utils.player_id_mapper - INFO - Loading NFL player ID crosswalk from nfl_data_py...
+2025-09-06 21:57:27,682 - src.utils.player_id_mapper - INFO - ✓ Loaded 12,115 players from nfl_data_py crosswalk
+2025-09-06 21:57:27,683 - src.utils.player_id_mapper - INFO -   sleeper_id: 6,155 players (50.8% coverage)
+2025-09-06 21:57:27,683 - src.utils.player_id_mapper - INFO -   mfl_id: 12,115 players (100.0% coverage)
+2025-09-06 21:57:27,683 - src.utils.player_id_mapper - INFO -   espn_id: 7,791 players (64.3% coverage)
+2025-09-06 21:57:27,683 - src.utils.player_id_mapper - INFO -   pfr_id: 6,821 players (56.3% coverage)
+2025-09-06 21:57:27,684 - src.utils.player_id_mapper - INFO -   gsis_id: 4,701 players (38.8% coverage)
+2025-09-06 21:57:27,684 - src.utils.player_id_mapper - INFO -   Cross-platform (Sleeper+MFL): 6,155 pre-matched players
+2025-09-06 21:57:28,068 - src.utils.player_id_mapper - INFO - ✓ Layer 1 complete: 12,115 players seeded from crosswalk
+2025-09-06 21:57:28,068 - src.utils.player_id_mapper - INFO -   Pre-matched cross-platform players: 6,132
+2025-09-06 21:57:28,068 - src.utils.player_id_mapper - INFO - LAYER 2-3: Processing live API data with smart matching...
+2025-09-06 21:57:28,068 - src.utils.player_id_mapper - INFO - Processing 11400 Sleeper players...
+2025-09-06 21:57:30,787 - src.utils.player_id_mapper - INFO - Sleeper integration: 5138 new, 6127 updated, 135 skipped
+2025-09-06 21:57:30,787 - src.utils.player_id_mapper - INFO - Processing 2650 MFL players...
+2025-09-06 21:57:31,048 - src.utils.player_id_mapper - INFO - MFL integration: 339 new, 2238 updated, 73 skipped
+2025-09-06 21:57:31,048 - src.utils.player_id_mapper - INFO - Created mapping for 17417 players
+2025-09-06 21:57:32,006 - src.utils.player_id_mapper - ERROR - Database error during player sync: (sqlite3.IntegrityError) UNIQUE constraint failed: players.espn_id
+[SQL: INSERT INTO players (nfl_id, sleeper_id, mfl_id, espn_id, name, position, team, depth_chart_position, is_starter, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id]
+[parameters: ('NFL_BFCD0CCE', '3344', '12816', '2582138', 'david morgan', 'TE', 'MIN', None, 1, '2025-09-06 12:57:31.870531', '2025-09-06 12:57:31.870531')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-09-06 21:57:32,007 - src.utils.player_id_mapper - ERROR - Failed to sync players to database: (sqlite3.IntegrityError) UNIQUE constraint failed: players.espn_id
+[SQL: INSERT INTO players (nfl_id, sleeper_id, mfl_id, espn_id, name, position, team, depth_chart_position, is_starter, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id]
+[parameters: ('NFL_BFCD0CCE', '3344', '12816', '2582138', 'david morgan', 'TE', 'MIN', None, 1, '2025-09-06 12:57:31.870531', '2025-09-06 12:57:31.870531')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-09-06 21:57:32,007 - src.services.player_data_sync - ERROR - Player unification failed during database sync
+2025-09-06 21:57:32,007 - src.services.player_data_sync - INFO - Player data sync completed in 9.53s - SUCCESS
+2025-09-06 21:57:32,007 - src.services.player_data_sync - INFO -   Platforms synced: Sleeper (11400 players), MFL (2650 players)
+2025-09-06 21:57:32,007 - src.services.player_data_sync - INFO -   Total unified: 0 players
+2025-09-06 21:57:32,007 - src.services.player_data_sync - INFO -   Cross-platform: 0 matched players
+2025-09-06 21:57:32,007 - src.services.player_data_sync - WARNING -   Completed with 1 warnings/errors
+2025-09-06 21:58:11,801 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 21:58:11,801 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 21:58:11,801 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 21:58:12,700 - src.services.player_data_sync - INFO - Starting comprehensive player data sync for Epic A cross-platform unification
+2025-09-06 21:58:12,700 - src.services.player_data_sync - INFO - Fetching all NFL players from Sleeper API...
+2025-09-06 21:58:14,081 - src.services.roster_sync - INFO - Successfully fetched 11400 players from Sleeper
+2025-09-06 21:58:14,083 - src.services.player_data_sync - INFO - ✓ Successfully fetched 11400 players from Sleeper
+2025-09-06 21:58:14,083 - src.services.player_data_sync - INFO - Fetching all NFL players from MFL API...
+2025-09-06 21:58:15,373 - src.services.roster_sync - INFO - Successfully fetched 2650 players from MFL
+2025-09-06 21:58:15,375 - src.services.player_data_sync - INFO - ✓ Successfully fetched 2650 players from MFL
+2025-09-06 21:58:15,375 - src.services.player_data_sync - INFO - Unifying players across platforms using canonical ID mapping...
+2025-09-06 21:58:15,375 - src.utils.player_id_mapper - INFO - Syncing player mappings to database...
+2025-09-06 21:58:15,375 - src.utils.player_id_mapper - INFO - Creating enhanced player ID mapping with layered data strategy...
+2025-09-06 21:58:15,375 - src.utils.player_id_mapper - INFO - LAYER 1: Seeding from nfl_data_py crosswalk...
+2025-09-06 21:58:15,375 - src.utils.player_id_mapper - INFO - Loading NFL player ID crosswalk from nfl_data_py...
+2025-09-06 21:58:37,757 - src.utils.player_id_mapper - INFO - ✓ Loaded 12,115 players from nfl_data_py crosswalk
+2025-09-06 21:58:37,758 - src.utils.player_id_mapper - INFO -   sleeper_id: 6,155 players (50.8% coverage)
+2025-09-06 21:58:37,758 - src.utils.player_id_mapper - INFO -   mfl_id: 12,115 players (100.0% coverage)
+2025-09-06 21:58:37,759 - src.utils.player_id_mapper - INFO -   espn_id: 7,791 players (64.3% coverage)
+2025-09-06 21:58:37,759 - src.utils.player_id_mapper - INFO -   pfr_id: 6,821 players (56.3% coverage)
+2025-09-06 21:58:37,759 - src.utils.player_id_mapper - INFO -   gsis_id: 4,701 players (38.8% coverage)
+2025-09-06 21:58:37,760 - src.utils.player_id_mapper - INFO -   Cross-platform (Sleeper+MFL): 6,155 pre-matched players
+2025-09-06 21:58:38,144 - src.utils.player_id_mapper - INFO - ✓ Layer 1 complete: 12,115 players seeded from crosswalk
+2025-09-06 21:58:38,145 - src.utils.player_id_mapper - INFO -   Pre-matched cross-platform players: 6,132
+2025-09-06 21:58:38,145 - src.utils.player_id_mapper - INFO - LAYER 2-3: Processing live API data with smart matching...
+2025-09-06 21:58:38,146 - src.utils.player_id_mapper - INFO - Processing 11400 Sleeper players...
+2025-09-06 21:58:40,873 - src.utils.player_id_mapper - INFO - Sleeper integration: 5138 new, 6127 updated, 135 skipped
+2025-09-06 21:58:40,873 - src.utils.player_id_mapper - INFO - Processing 2650 MFL players...
+2025-09-06 21:58:41,137 - src.utils.player_id_mapper - INFO - MFL integration: 339 new, 2238 updated, 73 skipped
+2025-09-06 21:58:41,138 - src.utils.player_id_mapper - INFO - Created mapping for 17417 players
+2025-09-06 21:58:42,496 - src.utils.player_id_mapper - INFO - Successfully synced 17417 players to database (from 17417 total)
+2025-09-06 21:58:42,502 - src.services.player_data_sync - INFO - ✓ Player unification completed successfully
+2025-09-06 21:58:42,502 - src.services.player_data_sync - INFO -   Total unified players: 17417
+2025-09-06 21:58:42,502 - src.services.player_data_sync - INFO -   Cross-platform matches: 6134
+2025-09-06 21:58:42,502 - src.services.player_data_sync - INFO - Player data sync completed in 29.80s - SUCCESS
+2025-09-06 21:58:42,502 - src.services.player_data_sync - INFO -   Platforms synced: Sleeper (11400 players), MFL (2650 players)
+2025-09-06 21:58:42,502 - src.services.player_data_sync - INFO -   Total unified: 17417 players
+2025-09-06 21:58:42,502 - src.services.player_data_sync - INFO -   Cross-platform: 6134 matched players
+2025-09-06 22:06:04,867 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 22:06:04,867 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 22:06:04,867 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 22:06:16,513 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 22:06:16,513 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 22:06:16,513 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 22:07:02,588 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 22:07:02,588 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 22:07:02,588 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 22:07:42,100 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 22:07:42,101 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 22:07:42,101 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 22:07:50,633 - src.services.usage_projections_service - INFO - Starting daily usage and projections sync
+2025-09-06 22:07:50,634 - src.services.usage_projections_service - INFO - Starting ESPN players sync
+2025-09-06 22:07:50,634 - src.services.espn_data_service - INFO - Starting ESPN player sync to database
+2025-09-06 22:07:50,634 - src.services.espn_data_service - INFO - Authenticating with ESPN league 2046935275
+2025-09-06 22:07:50,634 - src.services.espn_data_service - INFO - Using ESPN S2/SWID authentication
+2025-09-06 22:07:53,269 - src.services.espn_data_service - INFO - ✓ Successfully connected to ESPN league: Unknown
+2025-09-06 22:07:53,269 - src.services.espn_data_service - INFO - Fetching all players data from ESPN
+2025-09-06 22:07:53,269 - src.services.espn_data_service - INFO - Fetching free agents projections from ESPN
+2025-09-06 22:07:55,123 - src.services.espn_data_service - INFO - ✓ Successfully fetched 50 free agent projections from ESPN
+2025-09-06 22:07:55,123 - src.services.espn_data_service - INFO - Added 50 free agents
+2025-09-06 22:07:55,123 - src.services.espn_data_service - INFO - Added 10 teams' roster players
+2025-09-06 22:07:55,123 - src.services.espn_data_service - INFO - ✓ Successfully fetched 50 total players from ESPN
+2025-09-06 22:07:55,155 - src.services.espn_data_service - INFO - ✓ Successfully synced 50 ESPN players to database
+2025-09-06 22:07:55,155 - src.services.usage_projections_service - INFO - Starting projections sync for week current
+2025-09-06 22:07:55,155 - src.services.espn_data_service - INFO - Starting ESPN projections sync to database for week current
+2025-09-06 22:07:55,155 - src.services.espn_data_service - INFO - Fetching free agents projections from ESPN
+2025-09-06 22:07:57,157 - src.services.espn_data_service - INFO - ✓ Successfully fetched 50 free agent projections from ESPN
+2025-09-06 22:07:57,182 - src.services.espn_data_service - INFO - ✓ Successfully synced 50 ESPN projections to database
+2025-09-06 22:07:57,182 - src.services.usage_projections_service - INFO - Starting mock usage data sync
+2025-09-06 22:07:59,532 - src.services.usage_projections_service - INFO - ✓ Successfully created 2 mock usage records
+2025-09-06 22:07:59,543 - src.services.usage_projections_service - INFO - Daily sync completed: 3/3 operations successful
+2025-09-06 22:07:59,543 - src.services.waiver_candidates_builder - INFO - Building waiver candidates for league test_league_123, week 1
+2025-09-06 22:07:59,543 - src.services.usage_projections_service - INFO - Building waiver candidates data for league test_league_123, week 1
+2025-09-06 22:08:08,693 - src.services.usage_projections_service - INFO - ✓ Built 17420 waiver candidates
+2025-09-06 22:08:38,265 - src.services.waiver_candidates_builder - INFO - ✓ Built waiver candidates DataFrame with 17420 players
+2025-09-06 22:08:38,271 - src.services.waiver_candidates_builder - INFO - Building waiver candidates for league test_league_123, week 1
+2025-09-06 22:08:38,271 - src.services.usage_projections_service - INFO - Building waiver candidates data for league test_league_123, week 1
+2025-09-06 22:08:47,584 - src.services.usage_projections_service - INFO - ✓ Built 17420 waiver candidates
+2025-09-06 22:09:17,516 - src.services.waiver_candidates_builder - INFO - ✓ Built waiver candidates DataFrame with 17420 players
+2025-09-06 22:09:17,522 - src.services.waiver_candidates_builder - INFO - Refreshing waiver candidates table for league test_league_123
+2025-09-06 22:09:17,522 - src.services.waiver_candidates_builder - INFO - Building waiver candidates for league test_league_123, week 1
+2025-09-06 22:09:17,522 - src.services.usage_projections_service - INFO - Building waiver candidates data for league test_league_123, week 1
+2025-09-06 22:09:26,820 - src.services.usage_projections_service - INFO - ✓ Built 17420 waiver candidates
+2025-09-06 22:09:52,719 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 22:09:52,719 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 22:09:52,719 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 22:09:53,258 - src.services.player_data_sync - INFO - Validating Epic A cross-platform player unification...
+2025-09-06 22:09:53,432 - src.utils.player_id_mapper - INFO - Loaded 17420 players from database
+2025-09-06 22:09:53,438 - src.utils.player_id_mapper - INFO - Creating enhanced player ID mapping with layered data strategy...
+2025-09-06 22:09:53,439 - src.utils.player_id_mapper - INFO - LAYER 1: Seeding from nfl_data_py crosswalk...
+2025-09-06 22:09:53,439 - src.utils.player_id_mapper - INFO - Loading NFL player ID crosswalk from nfl_data_py...
+2025-09-06 22:09:56,184 - src.utils.player_id_mapper - INFO - ✓ Loaded 12,115 players from nfl_data_py crosswalk
+2025-09-06 22:09:56,185 - src.utils.player_id_mapper - INFO -   sleeper_id: 6,155 players (50.8% coverage)
+2025-09-06 22:09:56,185 - src.utils.player_id_mapper - INFO -   mfl_id: 12,115 players (100.0% coverage)
+2025-09-06 22:09:56,185 - src.utils.player_id_mapper - INFO -   espn_id: 7,791 players (64.3% coverage)
+2025-09-06 22:09:56,185 - src.utils.player_id_mapper - INFO -   pfr_id: 6,821 players (56.3% coverage)
+2025-09-06 22:09:56,185 - src.utils.player_id_mapper - INFO -   gsis_id: 4,701 players (38.8% coverage)
+2025-09-06 22:09:56,186 - src.utils.player_id_mapper - INFO -   Cross-platform (Sleeper+MFL): 6,155 pre-matched players
+2025-09-06 22:09:56,577 - src.utils.player_id_mapper - INFO - ✓ Layer 1 complete: 12,115 players seeded from crosswalk
+2025-09-06 22:09:56,578 - src.utils.player_id_mapper - INFO -   Pre-matched cross-platform players: 6,132
+2025-09-06 22:09:56,578 - src.utils.player_id_mapper - INFO - LAYER 2-3: Processing live API data with smart matching...
+2025-09-06 22:09:56,578 - src.utils.player_id_mapper - INFO - Processing 0 Sleeper players...
+2025-09-06 22:09:56,578 - src.utils.player_id_mapper - INFO - Sleeper integration: 0 new, 0 updated, 0 skipped
+2025-09-06 22:09:56,578 - src.utils.player_id_mapper - INFO - Processing 0 MFL players...
+2025-09-06 22:09:56,578 - src.utils.player_id_mapper - INFO - MFL integration: 0 new, 0 updated, 0 skipped
+2025-09-06 22:09:56,578 - src.utils.player_id_mapper - INFO - Created mapping for 11942 players
+2025-09-06 22:09:56,582 - src.services.player_data_sync - INFO - Cross-platform unification validation completed
+2025-09-06 22:09:56,582 - src.services.player_data_sync - INFO -   Status: EPIC_A_READY
+2025-09-06 22:09:56,582 - src.services.player_data_sync - INFO -   Unified players: 10
+2025-09-06 22:09:56,582 - src.services.player_data_sync - INFO -   Data quality: 74.7%

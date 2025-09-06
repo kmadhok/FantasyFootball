@@ -2,6 +2,8 @@ import logging
 import hashlib
 from typing import Dict, Optional, Any, List
 from dataclasses import dataclass
+import pandas as pd
+import nfl_data_py as nfl
 from ..database import SessionLocal, Player
 
 logger = logging.getLogger(__name__)
@@ -16,7 +18,17 @@ class PlayerInfo:
     sleeper_id: Optional[str] = None
     mfl_id: Optional[str] = None
     espn_id: Optional[str] = None
+    # Additional professional IDs from nfl_data_py
+    pfr_id: Optional[str] = None      # Pro Football Reference
+    gsis_id: Optional[str] = None     # NFL GSIS system
+    yahoo_id: Optional[str] = None    # Yahoo Fantasy
+    # Enhanced metadata
+    birthdate: Optional[str] = None
+    merge_name: Optional[str] = None  # Normalized name for matching
+    draft_year: Optional[int] = None
+    # Status flags
     active: bool = True
+    from_nfl_data_py: bool = False    # Indicates if seeded from crosswalk
 
 class PlayerIDMapper:
     """Maps platform-specific player IDs to canonical NFL IDs"""
@@ -262,6 +274,86 @@ class PlayerIDMapper:
         
         return team_mappings.get(team, team)
     
+    def load_nfl_data_py_crosswalk(self) -> pd.DataFrame:
+        """
+        Load NFL player ID crosswalk from nfl_data_py
+        
+        This provides battle-tested cross-platform ID mapping used by major fantasy sites.
+        Returns DataFrame with sleeper_id, mfl_id, espn_id, pfr_id, gsis_id, etc.
+        """
+        try:
+            logger.info("Loading NFL player ID crosswalk from nfl_data_py...")
+            
+            # Import the comprehensive player ID crosswalk
+            ids_df = nfl.import_ids()
+            
+            logger.info(f"✓ Loaded {len(ids_df):,} players from nfl_data_py crosswalk")
+            
+            # Log coverage statistics
+            key_platforms = ['sleeper_id', 'mfl_id', 'espn_id', 'pfr_id', 'gsis_id']
+            for platform in key_platforms:
+                if platform in ids_df.columns:
+                    coverage = ids_df[platform].notna().sum()
+                    pct = (coverage / len(ids_df)) * 100
+                    logger.info(f"  {platform}: {coverage:,} players ({pct:.1f}% coverage)")
+            
+            # Count cross-platform matches
+            cross_platform = ids_df[
+                (ids_df['sleeper_id'].notna()) & 
+                (ids_df['mfl_id'].notna())
+            ]
+            logger.info(f"  Cross-platform (Sleeper+MFL): {len(cross_platform):,} pre-matched players")
+            
+            return ids_df
+            
+        except Exception as e:
+            logger.error(f"Failed to load nfl_data_py crosswalk: {e}")
+            # Return empty DataFrame with expected columns if import fails
+            return pd.DataFrame(columns=['name', 'position', 'team', 'sleeper_id', 'mfl_id', 'espn_id', 'pfr_id', 'gsis_id', 'yahoo_id', 'birthdate', 'merge_name'])
+    
+    def create_player_from_crosswalk(self, row: pd.Series) -> PlayerInfo:
+        """Convert nfl_data_py crosswalk row to PlayerInfo"""
+        try:
+            # Use merge_name if available, fallback to name
+            display_name = row.get('merge_name', row.get('name', ''))
+            if pd.isna(display_name) or not display_name:
+                display_name = row.get('name', '')
+            
+            # Handle team normalization  
+            team = self.normalize_team(str(row.get('team', '')))
+            position = self.normalize_position(str(row.get('position', '')))
+            
+            # Generate canonical ID
+            canonical_id = self.generate_canonical_id(display_name, position, team)
+            
+            # Extract platform IDs (handle NaN values)
+            def safe_str(val):
+                return str(int(val)) if pd.notna(val) and val != '' else None
+            
+            player_info = PlayerInfo(
+                canonical_id=canonical_id,
+                name=display_name,
+                position=position,
+                team=team,
+                sleeper_id=safe_str(row.get('sleeper_id')),
+                mfl_id=str(row.get('mfl_id', '')) if pd.notna(row.get('mfl_id')) else None,
+                espn_id=safe_str(row.get('espn_id')),
+                pfr_id=str(row.get('pfr_id', '')) if pd.notna(row.get('pfr_id')) else None,
+                gsis_id=str(row.get('gsis_id', '')) if pd.notna(row.get('gsis_id')) else None,
+                yahoo_id=safe_str(row.get('yahoo_id')),
+                birthdate=str(row.get('birthdate', '')) if pd.notna(row.get('birthdate')) else None,
+                merge_name=str(row.get('merge_name', '')) if pd.notna(row.get('merge_name')) else None,
+                draft_year=int(row.get('draft_year', 0)) if pd.notna(row.get('draft_year')) and row.get('draft_year', 0) > 0 else None,
+                active=True,
+                from_nfl_data_py=True
+            )
+            
+            return player_info
+            
+        except Exception as e:
+            logger.warning(f"Failed to create PlayerInfo from crosswalk row: {e}")
+            return None
+    
     def _is_team_defense_entry(self, name: str, position: str) -> bool:
         """Filter out team defense and organizational entries"""
         if not name:
@@ -306,9 +398,16 @@ class PlayerIDMapper:
         return False
     
     def create_player_mapping(self, sleeper_players: Dict[str, Dict[str, Any]] = None, 
-                            mfl_players: List[Dict[str, Any]] = None) -> Dict[str, PlayerInfo]:
-        """Create comprehensive player ID mapping with smart cross-platform matching"""
-        logger.info("Creating player ID mapping...")
+                            mfl_players: List[Dict[str, Any]] = None, 
+                            use_nfl_data_py: bool = True) -> Dict[str, PlayerInfo]:
+        """
+        Create comprehensive player ID mapping with layered data strategy
+        
+        Layer 1: nfl_data_py crosswalk (authoritative for stable cross-platform IDs)
+        Layer 2: Smart matching algorithm (handles new/missing players)  
+        Layer 3: Live API data (current team/status/position)
+        """
+        logger.info("Creating enhanced player ID mapping with layered data strategy...")
         
         # Use provided data or empty defaults
         sleeper_players = sleeper_players or {}
@@ -318,9 +417,39 @@ class PlayerIDMapper:
         # Track alternative mappings for fallback matching
         name_position_mapping = {}  # For when team is UNKNOWN
         
-        # Process Sleeper players
+        # LAYER 1: Seed from nfl_data_py crosswalk (if enabled)
+        crosswalk_seeded = 0
+        if use_nfl_data_py:
+            try:
+                logger.info("LAYER 1: Seeding from nfl_data_py crosswalk...")
+                crosswalk_df = self.load_nfl_data_py_crosswalk()
+                
+                for _, row in crosswalk_df.iterrows():
+                    player_info = self.create_player_from_crosswalk(row)
+                    if player_info and player_info.name:
+                        player_mapping[player_info.canonical_id] = player_info
+                        
+                        # Track for fallback matching
+                        name_pos_key = f"{player_info.name}|{player_info.position}"
+                        name_position_mapping[name_pos_key] = player_info
+                        crosswalk_seeded += 1
+                
+                logger.info(f"✓ Layer 1 complete: {crosswalk_seeded:,} players seeded from crosswalk")
+                
+                # Count pre-matched cross-platform players
+                pre_matched = sum(1 for p in player_mapping.values() if p.sleeper_id and p.mfl_id)
+                logger.info(f"  Pre-matched cross-platform players: {pre_matched:,}")
+                
+            except Exception as e:
+                logger.warning(f"Layer 1 nfl_data_py seeding failed, continuing with smart matching: {e}")
+        
+        # LAYER 2 & 3: Smart matching with live API data (enhanced from original)
+        logger.info("LAYER 2-3: Processing live API data with smart matching...")
+        
+        # Process Sleeper players with crosswalk integration
         logger.info(f"Processing {len(sleeper_players)} Sleeper players...")
         sleeper_processed = 0
+        sleeper_updated = 0
         sleeper_skipped = 0
         
         for sleeper_id, player_data in sleeper_players.items():
@@ -342,35 +471,58 @@ class PlayerIDMapper:
                 sleeper_skipped += 1
                 continue
             
-            # Create canonical ID with available data
-            if team and team != "UNKNOWN":
-                canonical_id = self.generate_canonical_id(name, position, team)
+            # Strategy 1: Try to match with existing crosswalk player by Sleeper ID
+            existing_player = None
+            for player in player_mapping.values():
+                if player.sleeper_id == sleeper_id:
+                    existing_player = player
+                    break
+            
+            if existing_player:
+                # Update existing crosswalk player with live Sleeper data
+                if team != "UNKNOWN" and existing_player.team == "UNKNOWN":
+                    existing_player.team = team
+                if position != "UNKNOWN":
+                    existing_player.position = position
+                existing_player.active = active
+                sleeper_updated += 1
             else:
-                # Fallback to name+position when team is unknown
-                canonical_id = self.generate_canonical_id(name, position, "UNKNOWN")
-            
-            player_info = PlayerInfo(
-                canonical_id=canonical_id,
-                name=name,
-                position=position,
-                team=team,
-                sleeper_id=sleeper_id,
-                active=active
-            )
-            
-            player_mapping[canonical_id] = player_info
-            
-            # Also track by name+position for fallback matching
-            name_pos_key = f"{name}|{position}"
-            name_position_mapping[name_pos_key] = player_info
-            sleeper_processed += 1
+                # Strategy 2: Try name+position matching with crosswalk
+                name_pos_key = f"{name}|{position}"
+                if name_pos_key in name_position_mapping:
+                    existing_player = name_position_mapping[name_pos_key]
+                    if not existing_player.sleeper_id:  # Only if not already assigned
+                        existing_player.sleeper_id = sleeper_id
+                        existing_player.active = active
+                        if team != "UNKNOWN":
+                            existing_player.team = team
+                        sleeper_updated += 1
+                    else:
+                        sleeper_skipped += 1  # Already has different Sleeper ID
+                else:
+                    # Strategy 3: Create new player (not in crosswalk)
+                    canonical_id = self.generate_canonical_id(name, position, team or "UNKNOWN")
+                    
+                    player_info = PlayerInfo(
+                        canonical_id=canonical_id,
+                        name=name,
+                        position=position,
+                        team=team,
+                        sleeper_id=sleeper_id,
+                        active=active,
+                        from_nfl_data_py=False  # This is a new player not in crosswalk
+                    )
+                    
+                    player_mapping[canonical_id] = player_info
+                    name_position_mapping[name_pos_key] = player_info
+                    sleeper_processed += 1
         
-        logger.info(f"Processed {sleeper_processed} Sleeper players, skipped {sleeper_skipped}")
+        logger.info(f"Sleeper integration: {sleeper_processed} new, {sleeper_updated} updated, {sleeper_skipped} skipped")
         
-        # Process MFL players with smart matching
+        # Process MFL players with enhanced crosswalk integration  
         logger.info(f"Processing {len(mfl_players)} MFL players...")
         mfl_processed = 0
-        mfl_matched = 0
+        mfl_updated = 0
         mfl_skipped = 0
         
         for mfl_player in mfl_players:
@@ -389,57 +541,53 @@ class PlayerIDMapper:
                 mfl_skipped += 1
                 continue
             
-            # Strategy 1: Exact match (name + position + team)
-            canonical_id = None
-            matched_player = None
+            # Strategy 1: Try to match with existing crosswalk player by MFL ID
+            existing_player = None
+            for player in player_mapping.values():
+                if player.mfl_id == mfl_id:
+                    existing_player = player
+                    break
             
-            if team and team != "UNKNOWN":
-                canonical_id = self.generate_canonical_id(name, position, team)
-                if canonical_id in player_mapping:
-                    matched_player = player_mapping[canonical_id]
-            
-            # Strategy 2: Fallback to name + position match (when team differs)
-            if not matched_player:
+            if existing_player:
+                # Update existing crosswalk player with live MFL data
+                if team != "UNKNOWN" and existing_player.team == "UNKNOWN":
+                    existing_player.team = team
+                if position != "UNKNOWN":
+                    existing_player.position = position
+                existing_player.active = True
+                mfl_updated += 1
+            else:
+                # Strategy 2: Try name+position matching with crosswalk
                 name_pos_key = f"{name}|{position}"
                 if name_pos_key in name_position_mapping:
-                    matched_player = name_position_mapping[name_pos_key]
-                    canonical_id = matched_player.canonical_id
-            
-            # Strategy 3: Create new player if no match found
-            if matched_player:
-                # Update existing player with MFL ID
-                matched_player.mfl_id = mfl_id
-                # Update team info if MFL has better data
-                if team and team != "UNKNOWN" and matched_player.team == "UNKNOWN":
-                    matched_player.team = team
-                    # Regenerate canonical ID with better team data
-                    new_canonical_id = self.generate_canonical_id(matched_player.name, matched_player.position, team)
-                    if new_canonical_id != canonical_id:
-                        # Move to new canonical ID
-                        del player_mapping[canonical_id]
-                        matched_player.canonical_id = new_canonical_id
-                        player_mapping[new_canonical_id] = matched_player
-                mfl_matched += 1
-            else:
-                # Create new MFL-only player
-                canonical_id = self.generate_canonical_id(name, position, team or "UNKNOWN")
-                player_info = PlayerInfo(
-                    canonical_id=canonical_id,
-                    name=name,
-                    position=position,
-                    team=team or "UNKNOWN",
-                    mfl_id=mfl_id,
-                    active=True
-                )
-                player_mapping[canonical_id] = player_info
-                
-                # Track for future matching
-                name_pos_key = f"{name}|{position}"
-                name_position_mapping[name_pos_key] = player_info
-            
-            mfl_processed += 1
+                    existing_player = name_position_mapping[name_pos_key]
+                    if not existing_player.mfl_id:  # Only if not already assigned
+                        existing_player.mfl_id = mfl_id
+                        existing_player.active = True
+                        if team != "UNKNOWN":
+                            existing_player.team = team
+                        mfl_updated += 1
+                    else:
+                        mfl_skipped += 1  # Already has different MFL ID
+                else:
+                    # Strategy 3: Create new player (not in crosswalk)
+                    canonical_id = self.generate_canonical_id(name, position, team or "UNKNOWN")
+                    
+                    player_info = PlayerInfo(
+                        canonical_id=canonical_id,
+                        name=name,
+                        position=position,
+                        team=team or "UNKNOWN",
+                        mfl_id=mfl_id,
+                        active=True,
+                        from_nfl_data_py=False  # This is a new player not in crosswalk
+                    )
+                    
+                    player_mapping[canonical_id] = player_info
+                    name_position_mapping[name_pos_key] = player_info
+                    mfl_processed += 1
         
-        logger.info(f"Processed {mfl_processed} MFL players, matched {mfl_matched}, skipped {mfl_skipped}")
+        logger.info(f"MFL integration: {mfl_processed} new, {mfl_updated} updated, {mfl_skipped} skipped")
         
         logger.info(f"Created mapping for {len(player_mapping)} players")
         self._player_cache = player_mapping
@@ -647,22 +795,53 @@ class PlayerIDMapper:
                 # Clear existing players
                 db.query(Player).delete()
                 
-                # Add all mapped players
+                # Add all mapped players with duplicate handling
+                seen_espn_ids = set()
+                seen_sleeper_ids = set() 
+                seen_mfl_ids = set()
+                added_count = 0
+                
                 for player_info in self._player_cache.values():
-                    player = Player(
-                        nfl_id=player_info.canonical_id,
-                        sleeper_id=player_info.sleeper_id,
-                        mfl_id=player_info.mfl_id,
-                        espn_id=player_info.espn_id,
-                        name=player_info.name,
-                        position=player_info.position,
-                        team=player_info.team,
-                        is_starter=self._is_starter_position(player_info.position)
-                    )
-                    db.add(player)
+                    # Handle duplicate ESPN IDs
+                    espn_id = player_info.espn_id
+                    if espn_id and espn_id in seen_espn_ids:
+                        espn_id = None  # Clear duplicate ESPN ID
+                    elif espn_id:
+                        seen_espn_ids.add(espn_id)
+                    
+                    # Handle duplicate Sleeper IDs  
+                    sleeper_id = player_info.sleeper_id
+                    if sleeper_id and sleeper_id in seen_sleeper_ids:
+                        sleeper_id = None
+                    elif sleeper_id:
+                        seen_sleeper_ids.add(sleeper_id)
+                    
+                    # Handle duplicate MFL IDs
+                    mfl_id = player_info.mfl_id
+                    if mfl_id and mfl_id in seen_mfl_ids:
+                        mfl_id = None
+                    elif mfl_id:
+                        seen_mfl_ids.add(mfl_id)
+                    
+                    try:
+                        player = Player(
+                            nfl_id=player_info.canonical_id,
+                            sleeper_id=sleeper_id,
+                            mfl_id=mfl_id,
+                            espn_id=espn_id,
+                            name=player_info.name,
+                            position=player_info.position,
+                            team=player_info.team,
+                            is_starter=self._is_starter_position(player_info.position)
+                        )
+                        db.add(player)
+                        added_count += 1
+                    except Exception as e:
+                        logger.warning(f"Failed to add player {player_info.name}: {e}")
+                        continue
                 
                 db.commit()
-                logger.info(f"Successfully synced {len(self._player_cache)} players to database")
+                logger.info(f"Successfully synced {added_count} players to database (from {len(self._player_cache)} total)")
                 return True
                 
             except Exception as e:
