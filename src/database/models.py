@@ -12,6 +12,7 @@ class Player(Base):
     nfl_id = Column(String(50), unique=True, nullable=False)
     sleeper_id = Column(String(50), unique=True, nullable=True)
     mfl_id = Column(String(50), unique=True, nullable=True)
+    espn_id = Column(String(50), unique=True, nullable=True)
     name = Column(String(100), nullable=False)
     position = Column(String(10), nullable=False)
     team = Column(String(10), nullable=False)
@@ -26,6 +27,69 @@ class Player(Base):
     alerts = relationship("Alert", back_populates="player")
     waiver_claims = relationship("WaiverClaim", foreign_keys="[WaiverClaim.player_id]")
     dropped_claims = relationship("WaiverClaim", foreign_keys="[WaiverClaim.dropped_player_id]")
+    usage_stats = relationship("PlayerUsage", back_populates="player")
+    projections = relationship("PlayerProjections", back_populates="player")
+
+class PlayerUsage(Base):
+    __tablename__ = 'player_usage'
+    
+    id = Column(Integer, primary_key=True)
+    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
+    week = Column(Integer, nullable=False)
+    season = Column(Integer, nullable=False, default=2025)
+    snap_pct = Column(Float, nullable=True)
+    route_pct = Column(Float, nullable=True)
+    target_share = Column(Float, nullable=True)
+    carry_share = Column(Float, nullable=True)
+    rz_touches = Column(Integer, nullable=True)
+    ez_targets = Column(Integer, nullable=True)
+    targets = Column(Integer, nullable=True)
+    carries = Column(Integer, nullable=True)
+    receptions = Column(Integer, nullable=True)
+    receiving_yards = Column(Float, nullable=True)
+    rushing_yards = Column(Float, nullable=True)
+    touchdowns = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    player = relationship("Player", back_populates="usage_stats")
+    
+    __table_args__ = (
+        UniqueConstraint('player_id', 'week', 'season', name='unique_player_week_season_usage'),
+        Index('idx_usage_week_season', 'week', 'season'),
+        Index('idx_usage_player_week', 'player_id', 'week'),
+        {'sqlite_autoincrement': True}
+    )
+
+class PlayerProjections(Base):
+    __tablename__ = 'player_projections'
+    
+    id = Column(Integer, primary_key=True)
+    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
+    week = Column(Integer, nullable=False)
+    season = Column(Integer, nullable=False, default=2025)
+    projected_points = Column(Float, nullable=True)
+    floor = Column(Float, nullable=True)
+    ceiling = Column(Float, nullable=True)
+    mean = Column(Float, nullable=True)
+    stdev = Column(Float, nullable=True)
+    source = Column(String(50), nullable=False, default='espn')
+    scoring_format = Column(String(10), nullable=False, default='ppr')
+    confidence = Column(Float, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships  
+    player = relationship("Player", back_populates="projections")
+    
+    __table_args__ = (
+        UniqueConstraint('player_id', 'week', 'season', 'source', name='unique_player_week_season_source'),
+        Index('idx_proj_week_season', 'week', 'season'),
+        Index('idx_proj_player_week', 'player_id', 'week'),
+        Index('idx_proj_source', 'source'),
+        {'sqlite_autoincrement': True}
+    )
 
 class RosterEntry(Base):
     __tablename__ = 'roster_entries'
@@ -156,6 +220,55 @@ class DeduplicationLog(Base):
     
     # For 24-hour deduplication window
     expires_at = Column(DateTime, nullable=False)
+
+class WaiverCandidates(Base):
+    __tablename__ = 'waiver_candidates'
+    
+    # Composite primary key for materialized view
+    league_id = Column(String(50), nullable=False, primary_key=True)
+    week = Column(Integer, nullable=False, primary_key=True)
+    player_id = Column(Integer, ForeignKey('players.id'), nullable=False, primary_key=True)
+    
+    # Basic player info (for fast queries without joins)
+    pos = Column(String(10), nullable=False)
+    rostered = Column(Boolean, nullable=False, default=False)
+    
+    # Week-over-week deltas (Epic A requirement)
+    snap_delta = Column(Float, nullable=True)  # snap_pct change from previous week
+    route_delta = Column(Float, nullable=True)  # route_pct change from previous week
+    
+    # Advanced metrics (Epic A requirement)
+    tprr = Column(Float, nullable=True)  # targets per route run
+    rz_last2 = Column(Integer, nullable=True)  # red zone touches last 2 games
+    ez_last2 = Column(Integer, nullable=True)  # end zone targets last 2 games
+    
+    # Schedule and projections
+    opp_next = Column(String(10), nullable=True)  # opponent next week
+    proj_next = Column(Float, nullable=True)  # next week projection
+    
+    # Trend analysis (Epic A requirement)
+    trend_slope = Column(Float, nullable=True)  # 3-week trend slope
+    
+    # League context (Epic A requirement)
+    roster_fit = Column(Float, nullable=True)  # fit for user's roster needs
+    market_heat = Column(Float, nullable=True)  # interest from other teams
+    scarcity = Column(Float, nullable=True)  # positional scarcity in league
+    
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    player = relationship("Player")
+    
+    __table_args__ = (
+        # Indexes for fast querying (< 1 minute requirement)
+        Index('idx_wc_league_week', 'league_id', 'week'),
+        Index('idx_wc_league_pos', 'league_id', 'pos'),
+        Index('idx_wc_rostered', 'league_id', 'week', 'rostered'),
+        Index('idx_wc_proj_next', 'league_id', 'week', 'proj_next'),
+        {'sqlite_autoincrement': True}
+    )
 
 # Database configuration
 from ..config import get_database_url, ensure_data_directory

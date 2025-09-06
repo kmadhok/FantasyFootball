@@ -11,6 +11,9 @@ from apscheduler.executors.asyncio import AsyncIOExecutor
 from ..config import get_config
 from .roster_sync import RosterSyncService
 from .waiver_tracker import WaiverTrackerService
+from .usage_projections_service import UsageProjectionsService
+from .waiver_candidates_builder import WaiverCandidatesBuilder
+from .multi_source_pipeline import MultiSourceDataPipeline
 from ..utils.player_id_mapper import PlayerIDMapper
 
 logger = logging.getLogger(__name__)
@@ -23,6 +26,9 @@ class FantasyFootballScheduler:
         self.scheduler = None
         self.roster_sync_service = RosterSyncService()
         self.waiver_tracker_service = WaiverTrackerService()
+        self.usage_projections_service = UsageProjectionsService()
+        self.waiver_candidates_builder = WaiverCandidatesBuilder()
+        self.multi_source_pipeline = MultiSourceDataPipeline()
         self.player_mapper = PlayerIDMapper()
         self._setup_scheduler()
     
@@ -177,6 +183,95 @@ class FantasyFootballScheduler:
             logger.error(f"MFL FAAB sync job failed: {e}")
             raise
     
+    async def usage_projections_sync_job(self):
+        """Job to sync usage and projections data (Epic A)"""
+        job_start_time = datetime.utcnow()
+        logger.info(f"Starting usage and projections sync at {job_start_time}")
+        
+        try:
+            results = self.usage_projections_service.daily_sync_job()
+            
+            job_end_time = datetime.utcnow()
+            duration = (job_end_time - job_start_time).total_seconds()
+            
+            success_count = sum(results.values())
+            logger.info(f"Usage/projections sync completed in {duration:.2f}s - {success_count}/3 operations successful")
+            
+            # Log individual results
+            for operation, success in results.items():
+                status = "✓" if success else "✗"
+                logger.info(f"  {status} {operation}: {'SUCCESS' if success else 'FAILED'}")
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Usage/projections sync job failed: {e}")
+            raise
+    
+    async def multi_source_pipeline_job(self):
+        """Job to execute the multi-source data pipeline (Epic A)"""
+        job_start_time = datetime.utcnow()
+        logger.info(f"Starting multi-source data pipeline at {job_start_time}")
+        
+        try:
+            # Execute the full pipeline
+            result = await self.multi_source_pipeline.execute_full_pipeline()
+            
+            job_end_time = datetime.utcnow()
+            duration = (job_end_time - job_start_time).total_seconds()
+            
+            logger.info(f"Multi-source pipeline completed in {duration:.2f}s - {result.success_count}/3 services successful")
+            
+            # Log individual service results
+            services_results = {
+                'nfl_data': result.nfl_data_success,
+                'mfl_projections': result.mfl_projection_success,
+                'pfr_scraper': result.pfr_data_success
+            }
+            
+            for service, success in services_results.items():
+                status = "✓" if success else "✗"
+                logger.info(f"  {status} {service}: {'SUCCESS' if success else 'FAILED'}")
+            
+            # Return structured results for monitoring
+            return {
+                'multi_source_pipeline': result.overall_success,
+                'services_successful': result.success_count,
+                'total_records': (result.nfl_data_records + 
+                                result.mfl_projection_records + 
+                                result.pfr_data_records),
+                'duration': result.total_duration,
+                'individual_services': services_results
+            }
+            
+        except Exception as e:
+            logger.error(f"Multi-source pipeline job failed: {e}")
+            raise
+    
+    async def waiver_candidates_refresh_job(self):
+        """Job to refresh waiver candidates data (Epic A)"""
+        job_start_time = datetime.utcnow()
+        logger.info(f"Starting waiver candidates refresh at {job_start_time}")
+        
+        try:
+            # For now, refresh for a demo league ID
+            # In production, this would iterate through all active leagues
+            demo_league_id = "demo_league_12345"
+            
+            success = self.waiver_candidates_builder.refresh_waiver_candidates_table(demo_league_id)
+            
+            job_end_time = datetime.utcnow()
+            duration = (job_end_time - job_start_time).total_seconds()
+            
+            status = "SUCCESS" if success else "FAILED"
+            logger.info(f"Waiver candidates refresh completed in {duration:.2f}s - {status}")
+            
+            return {"waiver_candidates_refresh": success}
+            
+        except Exception as e:
+            logger.error(f"Waiver candidates refresh job failed: {e}")
+            raise
+    
     def schedule_roster_sync(self):
         """Schedule roster sync to run every 24 hours"""
         interval_hours = self.config.get_scheduler_config()['roster_sync_interval']
@@ -243,6 +338,47 @@ class FantasyFootballScheduler:
         )
         
         logger.info("Scheduled combined waiver sync to run every 6 hours")
+    
+    def schedule_epic_a_jobs(self):
+        """Schedule Epic A jobs (multi-source pipeline and waiver candidates refresh)"""
+        # Schedule multi-source data pipeline daily at 7 AM UTC (comprehensive data sync)
+        self.scheduler.add_job(
+            self.multi_source_pipeline_job,
+            trigger=CronTrigger(hour=7, minute=0),
+            id='multi_source_pipeline',
+            name='Multi-Source Data Pipeline Job',
+            replace_existing=True
+        )
+        
+        # Keep original usage/projections sync as backup option
+        self.scheduler.add_job(
+            self.usage_projections_sync_job,
+            trigger=CronTrigger(hour=7, minute=30),  # 30 minutes after main pipeline
+            id='usage_projections_sync_backup',
+            name='Usage/Projections Sync Backup Job',
+            replace_existing=True
+        )
+        
+        # Schedule waiver candidates refresh twice daily (morning and evening)
+        self.scheduler.add_job(
+            self.waiver_candidates_refresh_job,
+            trigger=CronTrigger(hour=8, minute=0),  # Morning refresh (after data sync)
+            id='waiver_candidates_morning',
+            name='Waiver Candidates Morning Refresh',
+            replace_existing=True
+        )
+        
+        self.scheduler.add_job(
+            self.waiver_candidates_refresh_job,
+            trigger=CronTrigger(hour=20, minute=0),  # Evening refresh
+            id='waiver_candidates_evening',
+            name='Waiver Candidates Evening Refresh',
+            replace_existing=True
+        )
+        
+        logger.info("Scheduled multi-source data pipeline to run daily at 7:00 AM UTC")
+        logger.info("Scheduled usage/projections backup sync at 7:30 AM UTC")
+        logger.info("Scheduled waiver candidates refresh twice daily (8:00 AM and 8:00 PM UTC)")
     
     def schedule_nfl_season_check(self):
         """Schedule job to check if we're in NFL season"""
@@ -323,6 +459,21 @@ class FantasyFootballScheduler:
         logger.info("Manual MFL FAAB sync triggered")
         return await self.mfl_faab_job()
     
+    async def manual_usage_projections_sync(self) -> Dict[str, Any]:
+        """Manually trigger usage and projections sync"""
+        logger.info("Manual usage/projections sync triggered")
+        return await self.usage_projections_sync_job()
+    
+    async def manual_waiver_candidates_refresh(self) -> Dict[str, Any]:
+        """Manually trigger waiver candidates refresh"""
+        logger.info("Manual waiver candidates refresh triggered")
+        return await self.waiver_candidates_refresh_job()
+    
+    async def manual_multi_source_pipeline(self) -> Dict[str, Any]:
+        """Manually trigger multi-source data pipeline"""
+        logger.info("Manual multi-source data pipeline triggered")
+        return await self.multi_source_pipeline_job()
+    
     def start(self):
         """Start the scheduler"""
         try:
@@ -334,6 +485,7 @@ class FantasyFootballScheduler:
             self.schedule_roster_sync()
             self.schedule_player_mapping_update()
             self.schedule_waiver_sync()  # Add waiver sync scheduling
+            self.schedule_epic_a_jobs()  # Add Epic A jobs
             self.schedule_nfl_season_check()
             
             # Start the scheduler
@@ -444,7 +596,11 @@ async def test_scheduler():
         print(f"   Sleeper: {sleeper_result}")
         print(f"   MFL: {mfl_result}")
         
-        print("\n5. Testing scheduler start/stop...")
+        print("\n5. Testing multi-source pipeline...")
+        pipeline_result = await scheduler.manual_multi_source_pipeline()
+        print(f"   Pipeline result: {pipeline_result}")
+        
+        print("\n6. Testing scheduler start/stop...")
         scheduler.start()
         
         # Check job status

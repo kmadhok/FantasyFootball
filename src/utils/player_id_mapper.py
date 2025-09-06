@@ -15,6 +15,7 @@ class PlayerInfo:
     team: str
     sleeper_id: Optional[str] = None
     mfl_id: Optional[str] = None
+    espn_id: Optional[str] = None
     active: bool = True
 
 class PlayerIDMapper:
@@ -25,6 +26,7 @@ class PlayerIDMapper:
         self.id_mappings: Dict[str, PlayerInfo] = {}
         self.sleeper_to_canonical: Dict[str, str] = {}
         self.mfl_to_canonical: Dict[str, str] = {}
+        self.espn_to_canonical: Dict[str, str] = {}
         
     def generate_canonical_id(self, name: str, position: str, team: str) -> str:
         """Generate a canonical NFL ID based on player attributes"""
@@ -175,7 +177,7 @@ class PlayerIDMapper:
         self._player_cache = player_mapping
         return player_mapping
     
-    def get_canonical_id(self, sleeper_id: str = None, mfl_id: str = None, 
+    def get_canonical_id(self, sleeper_id: str = None, mfl_id: str = None, espn_id: str = None,
                        name: str = None, position: str = None, team: str = None) -> Optional[str]:
         """Get canonical ID for a player given platform-specific ID or attributes"""
         # First try to find from internal mappings
@@ -184,6 +186,9 @@ class PlayerIDMapper:
         
         if mfl_id and mfl_id in self.mfl_to_canonical:
             return self.mfl_to_canonical[mfl_id]
+        
+        if espn_id and espn_id in self.espn_to_canonical:
+            return self.espn_to_canonical[espn_id]
         
         # Try to find from database
         try:
@@ -199,6 +204,12 @@ class PlayerIDMapper:
                     player = db.query(Player).filter(Player.mfl_id == mfl_id).first()
                     if player:
                         self.mfl_to_canonical[mfl_id] = player.nfl_id
+                        return player.nfl_id
+                
+                if espn_id:
+                    player = db.query(Player).filter(Player.espn_id == espn_id).first()
+                    if player:
+                        self.espn_to_canonical[espn_id] = player.nfl_id
                         return player.nfl_id
                 
                 # If name, position, team provided, generate canonical ID
@@ -230,7 +241,8 @@ class PlayerIDMapper:
                         position=player.position,
                         team=player.team,
                         sleeper_id=player.sleeper_id,
-                        mfl_id=player.mfl_id
+                        mfl_id=player.mfl_id,
+                        espn_id=player.espn_id
                     )
                     self.id_mappings[canonical_id] = player_info
                     return player_info
@@ -264,6 +276,8 @@ class PlayerIDMapper:
                         existing_player.sleeper_id = player_info.sleeper_id
                     if player_info.mfl_id:
                         existing_player.mfl_id = player_info.mfl_id
+                    if player_info.espn_id:
+                        existing_player.espn_id = player_info.espn_id
                     db.commit()
                     logger.debug(f"Updated existing player: {player_info.name}")
                 else:
@@ -272,6 +286,7 @@ class PlayerIDMapper:
                         nfl_id=canonical_id,
                         sleeper_id=player_info.sleeper_id,
                         mfl_id=player_info.mfl_id,
+                        espn_id=player_info.espn_id,
                         name=player_info.name,
                         position=player_info.position,
                         team=player_info.team,
@@ -287,6 +302,8 @@ class PlayerIDMapper:
                     self.sleeper_to_canonical[player_info.sleeper_id] = canonical_id
                 if player_info.mfl_id:
                     self.mfl_to_canonical[player_info.mfl_id] = canonical_id
+                if player_info.espn_id:
+                    self.espn_to_canonical[player_info.espn_id] = canonical_id
                 
                 return canonical_id
                 
@@ -311,7 +328,8 @@ class PlayerIDMapper:
                         position=player.position,
                         team=player.team,
                         sleeper_id=player.sleeper_id,
-                        mfl_id=player.mfl_id
+                        mfl_id=player.mfl_id,
+                        espn_id=player.espn_id
                     )
                     
                     self.id_mappings[player.nfl_id] = player_info
@@ -319,6 +337,8 @@ class PlayerIDMapper:
                         self.sleeper_to_canonical[player.sleeper_id] = player.nfl_id
                     if player.mfl_id:
                         self.mfl_to_canonical[player.mfl_id] = player.nfl_id
+                    if player.espn_id:
+                        self.espn_to_canonical[player.espn_id] = player.nfl_id
                 
                 logger.info(f"Loaded {len(players)} players from database")
                 
@@ -334,9 +354,10 @@ class PlayerIDMapper:
             "total_players": len(self.id_mappings),
             "sleeper_mappings": len(self.sleeper_to_canonical),
             "mfl_mappings": len(self.mfl_to_canonical),
+            "espn_mappings": len(self.espn_to_canonical),
             "cross_platform_mappings": len([
                 pid for pid, info in self.id_mappings.items() 
-                if info.sleeper_id and info.mfl_id
+                if sum([bool(info.sleeper_id), bool(info.mfl_id), bool(info.espn_id)]) >= 2
             ])
         }
     
@@ -364,6 +385,7 @@ class PlayerIDMapper:
                         nfl_id=player_info.canonical_id,
                         sleeper_id=player_info.sleeper_id,
                         mfl_id=player_info.mfl_id,
+                        espn_id=player_info.espn_id,
                         name=player_info.name,
                         position=player_info.position,
                         team=player_info.team,
@@ -441,11 +463,11 @@ def create_player_mapping(sleeper_players: Dict[str, Dict[str, Any]] = None,
     mapper = PlayerIDMapper()
     return mapper.create_player_mapping(sleeper_players, mfl_players)
 
-def get_canonical_id(sleeper_id: str = None, mfl_id: str = None, 
+def get_canonical_id(sleeper_id: str = None, mfl_id: str = None, espn_id: str = None,
                    name: str = None, position: str = None, team: str = None) -> Optional[str]:
     """Get canonical ID for a player"""
     mapper = PlayerIDMapper()
-    return mapper.get_canonical_id(sleeper_id=sleeper_id, mfl_id=mfl_id, 
+    return mapper.get_canonical_id(sleeper_id=sleeper_id, mfl_id=mfl_id, espn_id=espn_id,
                                  name=name, position=position, team=team)
 
 def sync_players_to_database(sleeper_players: Dict[str, Dict[str, Any]] = None, 

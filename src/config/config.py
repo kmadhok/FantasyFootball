@@ -41,6 +41,11 @@ class Config:
         self.MFL_LEAGUE_ID: str = os.getenv('MFL_LEAGUE_ID', '')
         self.MFL_LEAGUE_API_KEY: str = os.getenv('MFL_LEAGUE_API_KEY', '')
         
+        # ESPN Fantasy Configuration
+        self.ESPN_LEAGUE_ID: str = os.getenv('ESPN_LEAGUE_ID', '')
+        self.ESPN_S2: str = os.getenv('ESPN_S2', '')
+        self.SWID: str = os.getenv('SWID', '')
+        
         # Database Configuration
         default_db_path = f'sqlite:///{DATA_DIR / "fantasy_football.db"}'
         self.DATABASE_URL: str = os.getenv('DATABASE_URL', default_db_path)
