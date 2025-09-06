@@ -45,77 +45,269 @@ class PlayerIDMapper:
         return canonical_id
     
     def normalize_player_name(self, name: str) -> str:
-        """Normalize player name for matching"""
+        """Normalize player name for matching across platforms"""
         if not name:
             return ""
         
-        # Remove common suffixes and normalize
         name = name.strip()
-        suffixes = [" Jr.", " Sr.", " III", " II", " IV"]
+        
+        # Handle Last, First format conversion (MFL → Sleeper format)
+        if ", " in name and not name.startswith("Team") and not name.startswith("Bills"):
+            # Handle cases like "Smith Jr., John" or "Van Der Berg, Kyle"
+            parts = name.split(", ", 1)
+            if len(parts) == 2:
+                last_name = parts[0].strip()
+                first_part = parts[1].strip()
+                
+                # Check if last name has suffix that should stay with last name
+                last_name_suffixes = ["Jr", "Sr", "III", "II", "IV", "V"]
+                for suffix in last_name_suffixes:
+                    if last_name.endswith(" " + suffix):
+                        # Move suffix to end: "Smith Jr., John" → "John Smith Jr."
+                        last_name_base = last_name.replace(" " + suffix, "")
+                        name = f"{first_part} {last_name_base} {suffix}"
+                        break
+                else:
+                    # Standard case: "Allen, Josh" → "Josh Allen"
+                    name = f"{first_part} {last_name}"
+        
+        # Remove common suffixes temporarily for consistent processing
+        suffix_removed = ""
+        suffixes = [" Jr.", " Sr.", " III", " II", " IV", " V", " Jr", " Sr"]
         for suffix in suffixes:
             if name.endswith(suffix):
                 name = name[:-len(suffix)]
+                suffix_removed = suffix.replace(" Jr", " Jr.").replace(" Sr", " Sr.")  # Normalize dots
                 break
         
-        # Handle common name variations
+        # Handle common name variations and abbreviations
         name_mappings = {
             "DJ": "D.J.",
-            "AJ": "A.J.",
+            "AJ": "A.J.", 
             "TJ": "T.J.",
             "CJ": "C.J.",
             "JJ": "J.J.",
+            "RJ": "R.J.",
+            "BJ": "B.J.",
+            "PJ": "P.J.",
+            "MJ": "M.J.",
         }
         
+        # Apply name mappings at the start of names
         for old, new in name_mappings.items():
             if name.startswith(old + " "):
                 name = name.replace(old + " ", new + " ", 1)
+                break
         
+        # Clean up extra spaces and punctuation  
+        name = " ".join(name.split())  # Remove extra whitespace
+        name = name.replace(".  ", ".").replace("  ", " ")  # Normalize periods without adding extra spaces
+        
+        # Add suffix back
+        if suffix_removed:
+            name = name + suffix_removed
+            
         return name.strip()
     
     def normalize_position(self, position: str) -> str:
-        """Normalize position for consistency"""
+        """Normalize position for consistency across platforms"""
         if not position:
             return "UNKNOWN"
         
         position = position.strip().upper()
         
-        # Position mappings
+        # Comprehensive position mappings including MFL-specific codes
         position_mappings = {
+            # Standard fantasy positions
             "QB": "QB",
             "RB": "RB", 
             "WR": "WR",
             "TE": "TE",
             "K": "K",
+            "PK": "K",     # Place kicker
             "DEF": "DEF",
             "D/ST": "DEF",
             "DST": "DEF",
             "FLEX": "FLEX",
             "BN": "BN",
-            "IR": "IR"
+            "IR": "IR",
+            
+            # MFL-specific position codes
+            "TMWR": "DEF",     # Team Defense/Special Teams (MFL)
+            "TEAM": "DEF",     # Team Defense
+            "DT": "DL",        # Defensive Tackle → Defensive Line
+            "DE": "DL",        # Defensive End → Defensive Line  
+            "DL": "DL",        # Defensive Line
+            "LB": "LB",        # Linebacker
+            "ILB": "LB",       # Inside Linebacker
+            "OLB": "LB",       # Outside Linebacker
+            "CB": "DB",        # Cornerback → Defensive Back
+            "S": "DB",         # Safety → Defensive Back
+            "FS": "DB",        # Free Safety → Defensive Back
+            "SS": "DB",        # Strong Safety → Defensive Back
+            "DB": "DB",        # Defensive Back
+            
+            # Offensive line positions (usually not fantasy relevant)
+            "C": "OL",         # Center → Offensive Line
+            "G": "OL",         # Guard → Offensive Line
+            "T": "OL",         # Tackle → Offensive Line
+            "OL": "OL",        # Offensive Line
+            "OT": "OL",        # Offensive Tackle → Offensive Line
+            "OG": "OL",        # Offensive Guard → Offensive Line
+            
+            # Special teams and other positions
+            "P": "P",          # Punter
+            "LS": "LS",        # Long Snapper
+            "FB": "FB",        # Fullback
+            "H": "P",          # Holder (usually punter)
+            "NT": "DL",        # Nose Tackle → Defensive Line
+            
+            # Position groups for IDP (Individual Defensive Players)
+            "DL": "DL",
+            "LB": "LB", 
+            "DB": "DB",
+            
+            # Special roster designations
+            "BENCH": "BN",
+            "RESERVE": "IR",
+            "INJURED": "IR",
+            "PRACTICE": "PRACTICE",
+            "TAXI": "TAXI"
         }
+        
+        # Handle compound positions like "RB/WR" or "QB/RB" 
+        if "/" in position:
+            # Take the first position for primary classification
+            primary_position = position.split("/")[0].strip()
+            mapped_position = position_mappings.get(primary_position, primary_position)
+            return mapped_position
         
         return position_mappings.get(position, position)
     
     def normalize_team(self, team: str) -> str:
-        """Normalize team name for consistency"""
+        """Normalize team name for consistency across platforms"""
         if not team:
             return "UNKNOWN"
         
         team = team.strip().upper()
         
-        # Team mappings for consistency
+        # Handle full team names to abbreviations
+        full_name_mappings = {
+            "ARIZONA CARDINALS": "ARI",
+            "ATLANTA FALCONS": "ATL", 
+            "BALTIMORE RAVENS": "BAL",
+            "BUFFALO BILLS": "BUF",
+            "CAROLINA PANTHERS": "CAR",
+            "CHICAGO BEARS": "CHI",
+            "CINCINNATI BENGALS": "CIN",
+            "CLEVELAND BROWNS": "CLE",
+            "DALLAS COWBOYS": "DAL",
+            "DENVER BRONCOS": "DEN",
+            "DETROIT LIONS": "DET",
+            "GREEN BAY PACKERS": "GB",
+            "HOUSTON TEXANS": "HOU",
+            "INDIANAPOLIS COLTS": "IND",
+            "JACKSONVILLE JAGUARS": "JAC",
+            "KANSAS CITY CHIEFS": "KC",
+            "LAS VEGAS RAIDERS": "LV",
+            "LOS ANGELES CHARGERS": "LAC",
+            "LOS ANGELES RAMS": "LAR",
+            "MIAMI DOLPHINS": "MIA",
+            "MINNESOTA VIKINGS": "MIN",
+            "NEW ENGLAND PATRIOTS": "NE",
+            "NEW ORLEANS SAINTS": "NO",
+            "NEW YORK GIANTS": "NYG",
+            "NEW YORK JETS": "NYJ",
+            "PHILADELPHIA EAGLES": "PHI",
+            "PITTSBURGH STEELERS": "PIT",
+            "SAN FRANCISCO 49ERS": "SF",
+            "SEATTLE SEAHAWKS": "SEA",
+            "TAMPA BAY BUCCANEERS": "TB",
+            "TENNESSEE TITANS": "TEN",
+            "WASHINGTON COMMANDERS": "WAS"
+        }
+        
+        # Check full names first
+        if team in full_name_mappings:
+            return full_name_mappings[team]
+        
+        # Team abbreviation mappings for consistency between platforms
         team_mappings = {
-            "JAX": "JAC",
-            "LV": "LAS",
-            "WSH": "WAS",
+            # Standard variations
+            "JAX": "JAC",  # Jacksonville  
+            "LV": "LAS",   # Las Vegas (some platforms use LAS)
+            "LAS": "LV",   # Normalize to LV
+            "WSH": "WAS",  # Washington
+            "GBP": "GB",   # Green Bay
+            "KCC": "KC",   # Kansas City
+            "LAR": "LAR",  # Los Angeles Rams
+            "LAC": "LAC",  # Los Angeles Chargers
+            "NEP": "NE",   # New England
+            "NOS": "NO",   # New Orleans  
+            "SFO": "SF",   # San Francisco
+            "TBB": "TB",   # Tampa Bay
+            "LVR": "LV",   # Las Vegas Raiders
+            # Common alternate forms
+            "JAGUARS": "JAC",
+            "RAIDERS": "LV",
+            "CHIEFS": "KC",
+            "PACKERS": "GB",
+            "PATRIOTS": "NE",
+            "SAINTS": "NO",
+            "49ERS": "SF",
+            "BUCS": "TB",
+            "BUCCANEERS": "TB",
+            "COMMANDERS": "WAS"
         }
         
         return team_mappings.get(team, team)
     
+    def _is_team_defense_entry(self, name: str, position: str) -> bool:
+        """Filter out team defense and organizational entries"""
+        if not name:
+            return True
+            
+        name_upper = name.upper()
+        
+        # Team defense patterns
+        team_defense_patterns = [
+            "BILLS, BUFFALO",
+            "PATRIOTS, NEW ENGLAND", 
+            "DOLPHINS, MIAMI",
+            "JETS, NEW YORK",
+            "RAVENS, BALTIMORE",
+            "BROWNS, CLEVELAND",
+            "STEELERS, PITTSBURGH",
+            "BENGALS, CINCINNATI",
+            "TEXANS, HOUSTON",
+            "COLTS, INDIANAPOLIS",
+            "TITANS, TENNESSEE",
+            "JAGUARS, JACKSONVILLE",
+            "CHIEFS, KANSAS CITY",
+            "RAIDERS, LAS VEGAS",
+            "CHARGERS, LOS ANGELES",
+            "BRONCOS, DENVER"
+        ]
+        
+        # Check for specific team defense names
+        for pattern in team_defense_patterns:
+            if pattern in name_upper:
+                return True
+        
+        # Check for general team patterns
+        if (name_upper.startswith("TEAM ") or 
+            ", " in name and any(city in name_upper for city in ["BUFFALO", "NEW ENGLAND", "MIAMI", "BALTIMORE", "CLEVELAND", "PITTSBURGH", "CINCINNATI", "HOUSTON", "INDIANAPOLIS", "TENNESSEE", "JACKSONVILLE", "KANSAS CITY", "LAS VEGAS", "LOS ANGELES", "DENVER", "CHICAGO", "DETROIT", "GREEN BAY", "MINNESOTA", "ATLANTA", "CAROLINA", "NEW ORLEANS", "TAMPA BAY", "ARIZONA", "LOS ANGELES", "SAN FRANCISCO", "SEATTLE", "DALLAS", "NEW YORK", "PHILADELPHIA", "WASHINGTON"])):
+            return True
+        
+        # Check position-based filtering
+        if position in ["TMWR", "TEAM", "DEF"] and not any(typical_name in name_upper for typical_name in ["SMITH", "JOHNSON", "WILLIAMS", "BROWN", "JONES", "GARCIA", "MILLER", "DAVIS", "RODRIGUEZ", "MARTINEZ"]):
+            return True
+            
+        return False
     
     def create_player_mapping(self, sleeper_players: Dict[str, Dict[str, Any]] = None, 
                             mfl_players: List[Dict[str, Any]] = None) -> Dict[str, PlayerInfo]:
-        """Create comprehensive player ID mapping from provided data"""
+        """Create comprehensive player ID mapping with smart cross-platform matching"""
         logger.info("Creating player ID mapping...")
         
         # Use provided data or empty defaults
@@ -123,8 +315,14 @@ class PlayerIDMapper:
         mfl_players = mfl_players or []
         
         player_mapping = {}
+        # Track alternative mappings for fallback matching
+        name_position_mapping = {}  # For when team is UNKNOWN
         
         # Process Sleeper players
+        logger.info(f"Processing {len(sleeper_players)} Sleeper players...")
+        sleeper_processed = 0
+        sleeper_skipped = 0
+        
         for sleeper_id, player_data in sleeper_players.items():
             if not player_data:
                 continue
@@ -134,44 +332,114 @@ class PlayerIDMapper:
             team = self.normalize_team(player_data.get("team", ""))
             active = player_data.get("active", True)
             
-            if name and position and team:
+            # Skip if essential data is missing
+            if not name or not position:
+                sleeper_skipped += 1
+                continue
+                
+            # Filter out obvious non-player entries
+            if self._is_team_defense_entry(name, position):
+                sleeper_skipped += 1
+                continue
+            
+            # Create canonical ID with available data
+            if team and team != "UNKNOWN":
                 canonical_id = self.generate_canonical_id(name, position, team)
-                
-                player_info = PlayerInfo(
-                    canonical_id=canonical_id,
-                    name=name,
-                    position=position,
-                    team=team,
-                    sleeper_id=sleeper_id,
-                    active=active
-                )
-                
-                player_mapping[canonical_id] = player_info
+            else:
+                # Fallback to name+position when team is unknown
+                canonical_id = self.generate_canonical_id(name, position, "UNKNOWN")
+            
+            player_info = PlayerInfo(
+                canonical_id=canonical_id,
+                name=name,
+                position=position,
+                team=team,
+                sleeper_id=sleeper_id,
+                active=active
+            )
+            
+            player_mapping[canonical_id] = player_info
+            
+            # Also track by name+position for fallback matching
+            name_pos_key = f"{name}|{position}"
+            name_position_mapping[name_pos_key] = player_info
+            sleeper_processed += 1
         
-        # Process MFL players and match with existing
+        logger.info(f"Processed {sleeper_processed} Sleeper players, skipped {sleeper_skipped}")
+        
+        # Process MFL players with smart matching
+        logger.info(f"Processing {len(mfl_players)} MFL players...")
+        mfl_processed = 0
+        mfl_matched = 0
+        mfl_skipped = 0
+        
         for mfl_player in mfl_players:
             name = self.normalize_player_name(mfl_player.get("name", ""))
             position = self.normalize_position(mfl_player.get("position", ""))
             team = self.normalize_team(mfl_player.get("team", ""))
             mfl_id = mfl_player.get("id")
             
-            if name and position and team and mfl_id:
-                canonical_id = self.generate_canonical_id(name, position, team)
+            # Skip if essential data is missing
+            if not name or not position or not mfl_id:
+                mfl_skipped += 1
+                continue
                 
+            # Filter out team defense entries and non-player data
+            if self._is_team_defense_entry(name, position):
+                mfl_skipped += 1
+                continue
+            
+            # Strategy 1: Exact match (name + position + team)
+            canonical_id = None
+            matched_player = None
+            
+            if team and team != "UNKNOWN":
+                canonical_id = self.generate_canonical_id(name, position, team)
                 if canonical_id in player_mapping:
-                    # Update existing player with MFL ID
-                    player_mapping[canonical_id].mfl_id = mfl_id
-                else:
-                    # Create new player entry
-                    player_info = PlayerInfo(
-                        canonical_id=canonical_id,
-                        name=name,
-                        position=position,
-                        team=team,
-                        mfl_id=mfl_id,
-                        active=True
-                    )
-                    player_mapping[canonical_id] = player_info
+                    matched_player = player_mapping[canonical_id]
+            
+            # Strategy 2: Fallback to name + position match (when team differs)
+            if not matched_player:
+                name_pos_key = f"{name}|{position}"
+                if name_pos_key in name_position_mapping:
+                    matched_player = name_position_mapping[name_pos_key]
+                    canonical_id = matched_player.canonical_id
+            
+            # Strategy 3: Create new player if no match found
+            if matched_player:
+                # Update existing player with MFL ID
+                matched_player.mfl_id = mfl_id
+                # Update team info if MFL has better data
+                if team and team != "UNKNOWN" and matched_player.team == "UNKNOWN":
+                    matched_player.team = team
+                    # Regenerate canonical ID with better team data
+                    new_canonical_id = self.generate_canonical_id(matched_player.name, matched_player.position, team)
+                    if new_canonical_id != canonical_id:
+                        # Move to new canonical ID
+                        del player_mapping[canonical_id]
+                        matched_player.canonical_id = new_canonical_id
+                        player_mapping[new_canonical_id] = matched_player
+                mfl_matched += 1
+            else:
+                # Create new MFL-only player
+                canonical_id = self.generate_canonical_id(name, position, team or "UNKNOWN")
+                player_info = PlayerInfo(
+                    canonical_id=canonical_id,
+                    name=name,
+                    position=position,
+                    team=team or "UNKNOWN",
+                    mfl_id=mfl_id,
+                    active=True
+                )
+                player_mapping[canonical_id] = player_info
+                
+                # Track for future matching
+                name_pos_key = f"{name}|{position}"
+                name_position_mapping[name_pos_key] = player_info
+            
+            mfl_processed += 1
+        
+        logger.info(f"Processed {mfl_processed} MFL players, matched {mfl_matched}, skipped {mfl_skipped}")
         
         logger.info(f"Created mapping for {len(player_mapping)} players")
         self._player_cache = player_mapping
