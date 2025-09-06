@@ -14,6 +14,7 @@ from .waiver_tracker import WaiverTrackerService
 from .usage_projections_service import UsageProjectionsService
 from .waiver_candidates_builder import WaiverCandidatesBuilder
 from .multi_source_pipeline import MultiSourceDataPipeline
+from .player_data_sync import PlayerDataSyncService
 from ..utils.player_id_mapper import PlayerIDMapper
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ class FantasyFootballScheduler:
         self.usage_projections_service = UsageProjectionsService()
         self.waiver_candidates_builder = WaiverCandidatesBuilder()
         self.multi_source_pipeline = MultiSourceDataPipeline()
+        self.player_data_sync_service = PlayerDataSyncService()
         self.player_mapper = PlayerIDMapper()
         self._setup_scheduler()
     
@@ -86,29 +88,91 @@ class FantasyFootballScheduler:
             raise
     
     async def player_mapping_job(self):
-        """Job to update player mappings"""
+        """Job to update player mappings - now uses comprehensive player data sync"""
         job_start_time = datetime.utcnow()
-        logger.info(f"Starting scheduled player mapping update at {job_start_time}")
+        logger.info(f"Starting comprehensive player data sync at {job_start_time}")
         
         try:
-            # For now, just load existing mappings from database
-            # In a full implementation, you would fetch fresh data from APIs here
-            self.player_mapper.load_from_database()
-            
-            # Get statistics
-            stats = self.player_mapper.get_mapping_stats()
+            # Execute the comprehensive player data sync (Epic A completion)
+            result = self.player_data_sync_service.sync_all_player_data()
             
             job_end_time = datetime.utcnow()
             duration = (job_end_time - job_start_time).total_seconds()
             
-            logger.info(f"Player mapping update completed in {duration:.2f}s")
-            logger.info(f"Total players: {stats['total_players']}, Cross-platform: {stats['cross_platform_mappings']}")
+            status = "SUCCESS" if result.overall_success else "FAILED"
+            logger.info(f"Player data sync completed in {duration:.2f}s - {status}")
             
-            # Return stats as success indicator
-            return stats
+            if result.overall_success:
+                logger.info(f"  Sleeper: {result.sleeper_players_count} players")
+                logger.info(f"  MFL: {result.mfl_players_count} players")
+                logger.info(f"  Unified: {result.total_unified_players} total players")
+                logger.info(f"  Cross-platform: {result.cross_platform_matches} matched")
+            
+            # Return structured results
+            return {
+                "overall_success": result.overall_success,
+                "full_success": result.full_success,
+                "sleeper_success": result.sleeper_success,
+                "mfl_success": result.mfl_success,
+                "total_unified_players": result.total_unified_players,
+                "cross_platform_matches": result.cross_platform_matches,
+                "duration": result.duration,
+                "errors": result.errors
+            }
             
         except Exception as e:
-            logger.error(f"Player mapping job failed: {e}")
+            logger.error(f"Player data sync job failed: {e}")
+            raise
+    
+    async def player_data_sync_job(self):
+        """Dedicated job for Epic A player data synchronization"""
+        job_start_time = datetime.utcnow()
+        logger.info(f"Starting Epic A player data synchronization at {job_start_time}")
+        
+        try:
+            # Execute comprehensive player data sync
+            result = self.player_data_sync_service.sync_all_player_data()
+            
+            job_end_time = datetime.utcnow()
+            duration = (job_end_time - job_start_time).total_seconds()
+            
+            status = "SUCCESS" if result.overall_success else "FAILED"
+            logger.info(f"Epic A player data sync completed in {duration:.2f}s - {status}")
+            
+            # Log detailed results
+            platforms_synced = []
+            if result.sleeper_success:
+                platforms_synced.append(f"Sleeper ({result.sleeper_players_count})")
+            if result.mfl_success:
+                platforms_synced.append(f"MFL ({result.mfl_players_count})")
+            
+            if platforms_synced:
+                logger.info(f"  Platforms: {', '.join(platforms_synced)} players synced")
+                logger.info(f"  Unified database: {result.total_unified_players} total players")
+                logger.info(f"  Cross-platform matches: {result.cross_platform_matches}")
+                
+                if result.cross_platform_matches > 0:
+                    logger.info("  ✓ Epic A cross-platform unification ACTIVE")
+                else:
+                    logger.warning("  ⚠ Epic A cross-platform unification needs improvement")
+            else:
+                logger.error("  ✗ No platforms successfully synced")
+            
+            if result.errors:
+                logger.warning(f"  Completed with {len(result.errors)} errors:")
+                for error in result.errors[:3]:  # Show first 3 errors
+                    logger.warning(f"    - {error}")
+            
+            return {
+                "epic_a_player_sync": result.overall_success,
+                "platforms_synced": len(platforms_synced),
+                "total_unified_players": result.total_unified_players,
+                "cross_platform_unification": result.cross_platform_matches,
+                "duration": result.duration
+            }
+            
+        except Exception as e:
+            logger.error(f"Epic A player data sync job failed: {e}")
             raise
     
     async def waiver_sync_job(self):
@@ -340,7 +404,16 @@ class FantasyFootballScheduler:
         logger.info("Scheduled combined waiver sync to run every 6 hours")
     
     def schedule_epic_a_jobs(self):
-        """Schedule Epic A jobs (multi-source pipeline and waiver candidates refresh)"""
+        """Schedule Epic A jobs (player data sync, multi-source pipeline and waiver candidates refresh)"""
+        # Schedule Epic A player data sync weekly on Sundays at 6 AM UTC (before everything else)
+        self.scheduler.add_job(
+            self.player_data_sync_job,
+            trigger=CronTrigger(day_of_week=6, hour=6, minute=0),  # Sunday 6 AM UTC
+            id='epic_a_player_data_sync',
+            name='Epic A Player Data Sync Job',
+            replace_existing=True
+        )
+        
         # Schedule multi-source data pipeline daily at 7 AM UTC (comprehensive data sync)
         self.scheduler.add_job(
             self.multi_source_pipeline_job,
@@ -376,6 +449,7 @@ class FantasyFootballScheduler:
             replace_existing=True
         )
         
+        logger.info("Scheduled Epic A player data sync to run weekly on Sundays at 6:00 AM UTC")
         logger.info("Scheduled multi-source data pipeline to run daily at 7:00 AM UTC")
         logger.info("Scheduled usage/projections backup sync at 7:30 AM UTC")
         logger.info("Scheduled waiver candidates refresh twice daily (8:00 AM and 8:00 PM UTC)")
@@ -473,6 +547,11 @@ class FantasyFootballScheduler:
         """Manually trigger multi-source data pipeline"""
         logger.info("Manual multi-source data pipeline triggered")
         return await self.multi_source_pipeline_job()
+    
+    async def manual_player_data_sync(self) -> Dict[str, Any]:
+        """Manually trigger Epic A player data synchronization"""
+        logger.info("Manual Epic A player data sync triggered")
+        return await self.player_data_sync_job()
     
     def start(self):
         """Start the scheduler"""
