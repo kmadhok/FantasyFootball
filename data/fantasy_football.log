@@ -1425,3 +1425,12 @@ WHERE player_projections.week = ? AND player_projections.season = ?]
 2025-09-06 22:09:56,582 - src.services.player_data_sync - INFO -   Status: EPIC_A_READY
 2025-09-06 22:09:56,582 - src.services.player_data_sync - INFO -   Unified players: 10
 2025-09-06 22:09:56,582 - src.services.player_data_sync - INFO -   Data quality: 74.7%
+2025-09-06 22:18:56,840 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 22:18:56,841 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 22:18:56,841 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 22:20:39,801 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 22:20:39,801 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 22:20:39,801 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 22:20:46,015 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 22:20:46,015 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 22:20:46,015 - src.config.config - INFO - Configuration validation completed successfully
