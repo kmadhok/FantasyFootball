@@ -1434,3 +1434,39 @@ WHERE player_projections.week = ? AND player_projections.season = ?]
 2025-09-06 22:20:46,015 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
 2025-09-06 22:20:46,015 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
 2025-09-06 22:20:46,015 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 22:21:33,182 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 22:21:33,182 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 22:21:33,182 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 23:38:44,241 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 23:38:44,241 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 23:38:44,241 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 23:41:13,081 - src.config.config - WARNING - SLACK_WEBHOOK_URL not configured - alerts will not be sent
+2025-09-06 23:41:13,081 - src.config.config - WARNING - Twitter API not configured - Twitter news monitoring disabled
+2025-09-06 23:41:13,082 - src.config.config - INFO - Configuration validation completed successfully
+2025-09-06 23:41:13,816 - src.services.nfl_data_service - INFO - Fetching injury reports for years: [2024]
+2025-09-06 23:41:15,925 - src.services.nfl_data_service - INFO - ✓ Fetched 6215 injury report records
+2025-09-06 23:41:15,925 - src.services.nfl_data_service - INFO - Building injury data for week 1, season 2024
+2025-09-06 23:41:15,925 - src.services.nfl_data_service - INFO - Fetching injury reports for years: [2024]
+2025-09-06 23:41:17,288 - src.services.nfl_data_service - INFO - ✓ Fetched 6215 injury report records
+2025-09-06 23:41:17,511 - src.services.nfl_data_service - INFO - ✓ Built injury data for 206 players
+2025-09-06 23:41:17,529 - src.services.nfl_data_service - INFO - ✓ Synced 5 injury records to database
+2025-09-06 23:41:17,529 - src.services.nfl_data_service - INFO - Fetching depth charts for years: [2024]
+2025-09-06 23:41:23,619 - src.services.nfl_data_service - INFO - ✓ Fetched 37312 depth chart records
+2025-09-06 23:41:23,620 - src.services.nfl_data_service - INFO - Building depth chart data for week 1, season 2024
+2025-09-06 23:41:23,620 - src.services.nfl_data_service - INFO - Fetching depth charts for years: [2024]
+2025-09-06 23:41:29,711 - src.services.nfl_data_service - INFO - ✓ Fetched 37312 depth chart records
+2025-09-06 23:41:30,293 - src.services.nfl_data_service - INFO - ✓ Built depth chart data for 0 players
+2025-09-06 23:41:30,295 - src.services.nfl_data_service - INFO - Fetching betting lines for years: [2024]
+2025-09-06 23:41:31,691 - src.services.nfl_data_service - WARNING - No betting lines data available for years: [2024]
+2025-09-06 23:41:31,691 - src.services.nfl_data_service - INFO - Fetching NFL schedules for years: [2024]
+2025-09-06 23:41:40,823 - src.services.nfl_data_service - INFO - ✓ Fetched 285 schedule records
+2025-09-06 23:41:40,823 - src.services.nfl_data_service - INFO - Building schedule data for season 2024
+2025-09-06 23:41:40,823 - src.services.nfl_data_service - INFO - Fetching NFL schedules for years: [2024]
+2025-09-06 23:41:59,634 - src.services.nfl_data_service - INFO - ✓ Fetched 285 schedule records
+2025-09-06 23:41:59,678 - src.services.nfl_data_service - INFO - ✓ Built schedule data for 285 games
+2025-09-06 23:41:59,682 - src.services.nfl_data_service - INFO - ✓ Synced 10 schedule records to database
+2025-09-06 23:41:59,682 - src.services.nfl_data_service - INFO - Getting bye weeks for 4 teams in season 2024
+2025-09-06 23:41:59,682 - src.services.nfl_data_service - INFO - Fetching NFL schedules for years: [2024]
+2025-09-06 23:42:24,074 - src.services.nfl_data_service - INFO - ✓ Fetched 285 schedule records
+2025-09-06 23:42:24,075 - src.services.nfl_data_service - INFO - ✓ Found bye weeks for 4 teams
+2025-09-06 23:42:24,075 - src.services.nfl_data_service - INFO - Fetching play-by-play data for years: [2024]

@@ -107,6 +107,30 @@ class RosterEntry(Base):
     # Relationships
     player = relationship("Player", back_populates="roster_entries")
 
+class RosterSnapshot(Base):
+    __tablename__ = 'roster_snapshots'
+
+    id = Column(Integer, primary_key=True)
+    platform = Column(String(20), nullable=False)  # 'sleeper' or 'mfl'
+    league_id = Column(String(50), nullable=False)
+    team_id = Column(String(50), nullable=False)  # roster_id/owner_id (Sleeper) or franchise_id (MFL)
+    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
+    week = Column(Integer, nullable=False)
+    season = Column(Integer, nullable=False, default=2025)
+    slot = Column(String(20), nullable=True)
+    synced_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    player = relationship("Player")
+
+    __table_args__ = (
+        UniqueConstraint('platform', 'league_id', 'team_id', 'week', 'player_id', name='uq_roster_snapshot_unique'),
+        Index('idx_roster_snap_league_week', 'league_id', 'week'),
+        Index('idx_roster_snap_team_week', 'team_id', 'week'),
+        {'sqlite_autoincrement': True}
+    )
+
 class WaiverState(Base):
     __tablename__ = 'waiver_states'
     
@@ -220,6 +244,151 @@ class DeduplicationLog(Base):
     
     # For 24-hour deduplication window
     expires_at = Column(DateTime, nullable=False)
+
+class PlayerInjuryReport(Base):
+    __tablename__ = 'player_injury_reports'
+    
+    id = Column(Integer, primary_key=True)
+    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
+    week = Column(Integer, nullable=False)
+    season = Column(Integer, nullable=False, default=2025)
+    report_status = Column(String(20), nullable=True)  # 'Out', 'IR', 'Doubtful', 'Questionable', 'Probable'
+    practice_status = Column(String(10), nullable=True)  # 'DNP', 'LP', 'FP' (Did Not Participate, Limited, Full)
+    practice_participation_pct = Column(Float, nullable=True)  # Calculated from daily practice status
+    injury_description = Column(String(200), nullable=True)
+    days_on_report = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    player = relationship("Player")
+    
+    __table_args__ = (
+        UniqueConstraint('player_id', 'week', 'season', name='unique_player_injury_week_season'),
+        Index('idx_injury_week_season', 'week', 'season'),
+        Index('idx_injury_status', 'report_status'),
+        Index('idx_injury_player_week', 'player_id', 'week'),
+        {'sqlite_autoincrement': True}
+    )
+
+class DepthChart(Base):
+    __tablename__ = 'depth_charts'
+    
+    id = Column(Integer, primary_key=True)
+    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
+    team = Column(String(10), nullable=False)
+    position = Column(String(10), nullable=False)
+    depth_rank = Column(Integer, nullable=False)  # 1, 2, 3, etc. (1 = starter)
+    week = Column(Integer, nullable=False)
+    season = Column(Integer, nullable=False, default=2025)
+    formation = Column(String(20), nullable=True)  # '11 Personnel', '12 Personnel', etc.
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    player = relationship("Player")
+    
+    __table_args__ = (
+        UniqueConstraint('player_id', 'week', 'season', 'formation', name='unique_player_depth_week_season_formation'),
+        Index('idx_depth_team_pos_rank', 'team', 'position', 'depth_rank'),
+        Index('idx_depth_week_season', 'week', 'season'),
+        Index('idx_depth_player_week', 'player_id', 'week'),
+        {'sqlite_autoincrement': True}
+    )
+
+class BettingLine(Base):
+    __tablename__ = 'betting_lines'
+    
+    id = Column(Integer, primary_key=True)
+    game_id = Column(String(50), nullable=False)  # NFL game identifier
+    home_team = Column(String(10), nullable=False)
+    away_team = Column(String(10), nullable=False)
+    week = Column(Integer, nullable=False)
+    season = Column(Integer, nullable=False, default=2025)
+    total_line = Column(Float, nullable=True)  # Over/under total
+    spread_line = Column(Float, nullable=True)  # Point spread (negative = favorite)
+    home_moneyline = Column(Integer, nullable=True)
+    away_moneyline = Column(Integer, nullable=True)
+    home_implied_total = Column(Float, nullable=True)  # Calculated from total + spread
+    away_implied_total = Column(Float, nullable=True)  # Calculated from total + spread
+    sportsbook = Column(String(50), default='consensus')  # Data source
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    __table_args__ = (
+        UniqueConstraint('game_id', 'week', 'season', 'sportsbook', name='unique_game_week_season_book'),
+        Index('idx_betting_week_season', 'week', 'season'),
+        Index('idx_betting_teams', 'home_team', 'away_team'),
+        Index('idx_betting_total', 'total_line'),
+        {'sqlite_autoincrement': True}
+    )
+
+class NFLSchedule(Base):
+    __tablename__ = 'nfl_schedule'
+    
+    id = Column(Integer, primary_key=True)
+    game_id = Column(String(50), nullable=False, unique=True)
+    home_team = Column(String(10), nullable=False)
+    away_team = Column(String(10), nullable=False)
+    week = Column(Integer, nullable=False)
+    season = Column(Integer, nullable=False, default=2025)
+    game_date = Column(DateTime, nullable=True)
+    is_playoff = Column(Boolean, default=False)
+    completed = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    __table_args__ = (
+        Index('idx_schedule_week_season', 'week', 'season'),
+        Index('idx_schedule_team_week', 'home_team', 'week'),
+        Index('idx_schedule_team_week_away', 'away_team', 'week'),
+        Index('idx_schedule_date', 'game_date'),
+        {'sqlite_autoincrement': True}
+    )
+
+class DefensiveStats(Base):
+    __tablename__ = 'defensive_stats'
+    
+    id = Column(Integer, primary_key=True)
+    team = Column(String(10), nullable=False)
+    week = Column(Integer, nullable=False)
+    season = Column(Integer, nullable=False, default=2025)
+    opponent = Column(String(10), nullable=False)
+    
+    # Passing defense
+    sacks_allowed = Column(Integer, default=0)
+    qb_hits_allowed = Column(Integer, default=0)
+    passing_yards_allowed = Column(Float, default=0.0)
+    passing_tds_allowed = Column(Integer, default=0)
+    interceptions = Column(Integer, default=0)
+    pass_attempts_allowed = Column(Integer, default=0)
+    
+    # Rushing defense  
+    rushing_yards_allowed = Column(Float, default=0.0)
+    rushing_tds_allowed = Column(Integer, default=0)
+    rush_attempts_allowed = Column(Integer, default=0)
+    
+    # Advanced metrics
+    epa_per_pass_allowed = Column(Float, nullable=True)  # Expected Points Added per pass
+    epa_per_rush_allowed = Column(Float, nullable=True)  # Expected Points Added per rush
+    success_rate_allowed = Column(Float, nullable=True)  # Successful play rate allowed
+    red_zone_td_pct_allowed = Column(Float, nullable=True)  # RZ touchdown rate allowed
+    
+    # Derived metrics for streaming
+    qb_streaming_rank = Column(Integer, nullable=True)  # 1-32 rank for QB streaming
+    dst_streaming_rank = Column(Integer, nullable=True)  # 1-32 rank for DST streaming
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    __table_args__ = (
+        UniqueConstraint('team', 'week', 'season', name='unique_team_defensive_week_season'),
+        Index('idx_def_week_season', 'week', 'season'),
+        Index('idx_def_team_week', 'team', 'week'),
+        Index('idx_def_streaming_qb', 'qb_streaming_rank'),
+        Index('idx_def_streaming_dst', 'dst_streaming_rank'),
+        {'sqlite_autoincrement': True}
+    )
 
 class WaiverCandidates(Base):
     __tablename__ = 'waiver_candidates'

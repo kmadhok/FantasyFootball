@@ -22,3 +22,10 @@ pytest-mock==3.12.0
 black==23.11.0
 flake8==6.1.0
 mypy==1.7.1
+
+# Data & APIs
+pandas==2.2.2
+numpy==1.26.4
+nfl_data_py==0.3.3
+espn_api==0.21.0
+PyYAML==6.0.1

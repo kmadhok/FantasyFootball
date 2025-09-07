@@ -12,9 +12,11 @@ from ..config import get_config
 from .roster_sync import RosterSyncService
 from .waiver_tracker import WaiverTrackerService
 from .usage_projections_service import UsageProjectionsService
+from .nfl_data_service import NFLDataService
 from .waiver_candidates_builder import WaiverCandidatesBuilder
 from .player_data_sync import PlayerDataSyncService
 from ..utils.player_id_mapper import PlayerIDMapper
+from .rules_engine import evaluate_rules
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +32,7 @@ class FantasyFootballScheduler:
         self.waiver_candidates_builder = WaiverCandidatesBuilder()
         self.player_data_sync_service = PlayerDataSyncService()
         self.player_mapper = PlayerIDMapper()
+        self.nfl_data_service = NFLDataService()
         self._setup_scheduler()
     
     def _setup_scheduler(self):
@@ -269,6 +272,56 @@ class FantasyFootballScheduler:
         except Exception as e:
             logger.error(f"Usage/projections sync job failed: {e}")
             raise
+
+    async def nightly_data_ingestion_job(self):
+        """Nightly data ingestion for injuries, depth charts, betting lines, and defensive stats."""
+        job_start_time = datetime.utcnow()
+        logger.info(f"Starting nightly data ingestion at {job_start_time}")
+
+        try:
+            # Determine target week (current NFL week)
+            week = self.waiver_candidates_builder._get_current_nfl_week()
+
+            # Injuries
+            injuries = self.nfl_data_service.build_injury_data_from_reports(week)
+            inj_ok = self.nfl_data_service.sync_injury_data_to_database(injuries)
+
+            # Depth charts
+            depth = self.nfl_data_service.build_depth_chart_data(week)
+            depth_ok = self.nfl_data_service.sync_depth_chart_data_to_database(depth)
+
+            # Betting lines (for opp context)
+            betting = self.nfl_data_service.build_betting_data_from_lines(week)
+            bet_ok = self.nfl_data_service.sync_betting_data_to_database(betting)
+
+            # Defensive stats for opponent filters
+            def_stats = self.nfl_data_service.build_defensive_stats_from_pbp(week)
+            def_ok = self.nfl_data_service.sync_defensive_stats_to_database(def_stats)
+
+            duration = (datetime.utcnow() - job_start_time).total_seconds()
+            logger.info(f"Nightly ingestion completed in {duration:.2f}s (injuries={inj_ok}, depth={depth_ok}, betting={bet_ok}, defense={def_ok})")
+            return {
+                'injuries': inj_ok,
+                'depth': depth_ok,
+                'betting': bet_ok,
+                'defense': def_ok
+            }
+        except Exception as e:
+            logger.error(f"Nightly data ingestion failed: {e}")
+            raise
+
+    async def weekly_schedule_refresh_job(self):
+        """Weekly refresh of NFL schedule."""
+        job_start_time = datetime.utcnow()
+        logger.info(f"Starting weekly schedule refresh at {job_start_time}")
+        try:
+            schedule = self.nfl_data_service.build_schedule_data()
+            ok = self.nfl_data_service.sync_schedule_data_to_database(schedule)
+            logger.info(f"Weekly schedule refresh {'OK' if ok else 'FAILED'}")
+            return {'schedule': ok}
+        except Exception as e:
+            logger.error(f"Weekly schedule refresh failed: {e}")
+            raise
     
     
     async def waiver_candidates_refresh_job(self):
@@ -290,9 +343,22 @@ class FantasyFootballScheduler:
             logger.info(f"Waiver candidates refresh completed in {duration:.2f}s - {status}")
             
             return {"waiver_candidates_refresh": success}
-            
+        
         except Exception as e:
             logger.error(f"Waiver candidates refresh job failed: {e}")
+            raise
+
+    async def rules_evaluation_job(self):
+        """Evaluate B1–B4 rules and persist alerts after candidates refresh."""
+        job_start_time = datetime.utcnow()
+        logger.info(f"Starting rules evaluation at {job_start_time}")
+        try:
+            league_id = "demo_league_12345"  # align with refresh job demo league
+            stats = evaluate_rules(league_id)
+            logger.info(f"Rules evaluated: {stats}")
+            return stats
+        except Exception as e:
+            logger.error(f"Rules evaluation job failed: {e}")
             raise
     
     def schedule_roster_sync(self):
@@ -382,7 +448,25 @@ class FantasyFootballScheduler:
             name='Usage/Projections Sync Backup Job',
             replace_existing=True
         )
-        
+
+        # Nightly ingestion for injuries/depth/betting/defense at 03:00 UTC
+        self.scheduler.add_job(
+            self.nightly_data_ingestion_job,
+            trigger=CronTrigger(hour=3, minute=0),
+            id='nightly_data_ingestion',
+            name='Nightly Data Ingestion Job',
+            replace_existing=True
+        )
+
+        # Weekly schedule refresh Sunday 05:00 UTC
+        self.scheduler.add_job(
+            self.weekly_schedule_refresh_job,
+            trigger=CronTrigger(day_of_week=6, hour=5, minute=0),
+            id='weekly_schedule_refresh',
+            name='Weekly Schedule Refresh Job',
+            replace_existing=True
+        )
+
         # Schedule waiver candidates refresh twice daily (morning and evening)
         self.scheduler.add_job(
             self.waiver_candidates_refresh_job,
@@ -399,11 +483,30 @@ class FantasyFootballScheduler:
             name='Waiver Candidates Evening Refresh',
             replace_existing=True
         )
+
+        # Evaluate rules shortly after each refresh
+        self.scheduler.add_job(
+            self.rules_evaluation_job,
+            trigger=CronTrigger(hour=8, minute=10),
+            id='rules_eval_morning',
+            name='Rules Evaluation Morning',
+            replace_existing=True
+        )
+        self.scheduler.add_job(
+            self.rules_evaluation_job,
+            trigger=CronTrigger(hour=20, minute=10),
+            id='rules_eval_evening',
+            name='Rules Evaluation Evening',
+            replace_existing=True
+        )
         
         logger.info("Scheduled Epic A player data sync to run weekly on Sundays at 6:00 AM UTC")
         logger.info("Scheduled multi-source data pipeline to run daily at 7:00 AM UTC")
         logger.info("Scheduled usage/projections backup sync at 7:30 AM UTC")
+        logger.info("Scheduled nightly data ingestion at 03:00 AM UTC")
+        logger.info("Scheduled weekly schedule refresh Sunday 05:00 AM UTC")
         logger.info("Scheduled waiver candidates refresh twice daily (8:00 AM and 8:00 PM UTC)")
+        logger.info("Scheduled rules evaluation at 8:10 AM and 8:10 PM UTC")
     
     def schedule_nfl_season_check(self):
         """Schedule job to check if we're in NFL season"""

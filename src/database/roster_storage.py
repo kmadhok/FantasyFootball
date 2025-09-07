@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import and_, or_, func
 from sqlalchemy.orm import Session
 
-from .models import SessionLocal, Player, RosterEntry, WaiverState
+from .models import SessionLocal, Player, RosterEntry, WaiverState, RosterSnapshot
 from ..config import get_config
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,50 @@ class RosterStorageService:
     def get_db_session(self) -> Session:
         """Get a database session"""
         return SessionLocal()
+
+    def upsert_roster_snapshot(self, *, platform: str, league_id: str, team_id: str,
+                               player_id: int, week: int, season: int, slot: Optional[str] = None,
+                               synced_at: Optional[datetime] = None) -> bool:
+        """Idempotently upsert a roster snapshot row for (platform, league_id, team_id, week, player).
+
+        Unique key: (platform, league_id, team_id, week, player_id)
+        """
+        db = self.get_db_session()
+        try:
+            existing = db.query(RosterSnapshot).filter(
+                RosterSnapshot.platform == platform,
+                RosterSnapshot.league_id == league_id,
+                RosterSnapshot.team_id == team_id,
+                RosterSnapshot.week == week,
+                RosterSnapshot.player_id == player_id
+            ).first()
+
+            if existing:
+                existing.slot = slot or existing.slot
+                existing.season = season
+                existing.synced_at = synced_at or datetime.utcnow()
+                existing.updated_at = datetime.utcnow()
+            else:
+                snap = RosterSnapshot(
+                    platform=platform,
+                    league_id=league_id,
+                    team_id=team_id,
+                    player_id=player_id,
+                    week=week,
+                    season=season,
+                    slot=slot,
+                    synced_at=synced_at or datetime.utcnow()
+                )
+                db.add(snap)
+
+            db.commit()
+            return True
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Failed to upsert roster snapshot: {e}")
+            return False
+        finally:
+            db.close()
     
     def store_roster_entries(self, roster_entries: List[Dict[str, Any]], platform: str) -> bool:
         """Store roster entries for a specific platform"""

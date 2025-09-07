@@ -245,8 +245,8 @@ class EnhancedWaiverCandidatesBuilder:
                 return None
             
             total_targets = sum(u.targets for u in usage_data)
-            # Estimate total routes (route_pct * estimated team routes per game)
-            total_routes = sum((u.route_pct / 100.0) * 35 for u in usage_data)  # ~35 routes per game estimate
+            # Estimate total routes (route_pct in 0-1 scale * estimated routes/game)
+            total_routes = sum((u.route_pct or 0.0) * 35 for u in usage_data)  # ~35 routes per game estimate
             
             if total_routes > 0:
                 return total_targets / total_routes
@@ -467,10 +467,30 @@ class EnhancedWaiverCandidatesBuilder:
             return 0.5
     
     def _get_opponent_next_week(self, team: str, week: int) -> Optional[str]:
-        """Get opponent for next week (simplified - would use NFL schedule API)"""
-        # This would integrate with NFL schedule data in production
-        # For now, return None as placeholder
-        return None
+        """Get opponent for next week using NFLSchedule table if available."""
+        try:
+            db = SessionLocal()
+            try:
+                next_week = week + 1
+                from src.database import NFLSchedule  # local import to avoid circulars at module load
+
+                game = db.query(NFLSchedule).filter(
+                    NFLSchedule.week == next_week,
+                    ((NFLSchedule.home_team == team) | (NFLSchedule.away_team == team))
+                ).first()
+
+                if not game:
+                    return None
+
+                if game.home_team == team:
+                    return game.away_team
+                if game.away_team == team:
+                    return game.home_team
+                return None
+            finally:
+                db.close()
+        except Exception:
+            return None
     
     def sync_to_waiver_candidates_table(self, candidates: List[EnhancedWaiverCandidate]) -> bool:
         """Sync candidates to WaiverCandidates database table"""

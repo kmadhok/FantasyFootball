@@ -61,6 +61,10 @@ def create_indexes():
             
             # Index on waiver states
             conn.execute(text("CREATE INDEX IF NOT EXISTS idx_waiver_platform_league ON waiver_states (platform, league_id)"))
+
+            # Indexes on roster snapshots
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_roster_snap_league_week ON roster_snapshots (league_id, week)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_roster_snap_team_week ON roster_snapshots (team_id, week)"))
             
             conn.commit()
             logger.info("Database indexes created successfully")

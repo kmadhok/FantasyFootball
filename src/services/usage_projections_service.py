@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from src.config.config import get_config
 from src.database import SessionLocal, Player, PlayerUsage, PlayerProjections, RosterEntry
 from src.services.espn_data_service import ESPNDataService, ESPNPlayerData
+from src.services.mfl_projection_service import MFLProjectionService
 from src.utils.player_id_mapper import PlayerIDMapper
 from src.utils.retry_handler import handle_api_request
 
@@ -37,6 +38,7 @@ class UsageProjectionsService:
     def __init__(self):
         self.config = get_config()
         self.espn_service = ESPNDataService()
+        self.mfl_service = MFLProjectionService()
         self.player_mapper = PlayerIDMapper()
         self.current_season = 2025
         
@@ -54,8 +56,11 @@ class UsageProjectionsService:
             # Sync ESPN player data first
             results["espn_players_sync"] = self.sync_espn_players()
             
-            # Sync projections
-            results["projections_sync"] = self.sync_projections_from_espn()
+            # Sync projections (prefer MFL; fallback to ESPN if MFL fails)
+            proj_ok = self.sync_projections_from_mfl()
+            if not proj_ok:
+                proj_ok = self.sync_projections_from_espn()
+            results["projections_sync"] = proj_ok
             
             # Sync available usage data (mock for now)
             results["usage_sync"] = self.sync_mock_usage_data()
@@ -85,6 +90,15 @@ class UsageProjectionsService:
             return self.espn_service.sync_projections_to_database(week)
         except Exception as e:
             logger.error(f"Projections sync failed: {e}")
+            return False
+
+    def sync_projections_from_mfl(self, week: Optional[int] = None) -> bool:
+        """Sync projections from MFL (preferred source given league context)."""
+        try:
+            logger.info(f"Starting MFL projections sync for week {week or 'current'}")
+            return self.mfl_service.sync_projections_to_database(week)
+        except Exception as e:
+            logger.error(f"MFL projections sync failed: {e}")
             return False
     
     def sync_mock_usage_data(self, week: Optional[int] = None) -> bool:

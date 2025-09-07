@@ -221,6 +221,7 @@ class RosterSyncService:
         self.mfl_client = MFLAPIClient()
         self.player_mapper = PlayerIDMapper()
         self.storage_service = get_storage_service()
+        self.current_season = 2025
         
     def sync_sleeper_rosters(self) -> bool:
         """Sync rosters from Sleeper platform with comprehensive error handling"""
@@ -317,6 +318,20 @@ class RosterSyncService:
                                 is_active=True
                             )
                             db.add(roster_entry)
+
+                            # Snapshot this roster state (idempotent)
+                            try:
+                                self.storage_service.upsert_roster_snapshot(
+                                    platform="sleeper",
+                                    league_id=self.sleeper_client.league_id,
+                                    team_id=str(owner_id or roster_id),
+                                    player_id=player.id,
+                                    week=self._get_current_nfl_week(),
+                                    season=self.current_season,
+                                    slot="active",
+                                )
+                            except Exception as e:
+                                logger.warning(f"Failed to snapshot Sleeper roster: {e}")
                 
                 db.commit()
                 logger.info("Sleeper roster sync completed successfully")
@@ -416,6 +431,20 @@ class RosterSyncService:
                                 is_active=True
                             )
                             db.add(roster_entry)
+
+                            # Snapshot this roster state (idempotent)
+                            try:
+                                self.storage_service.upsert_roster_snapshot(
+                                    platform="mfl",
+                                    league_id=self.mfl_client.league_id,
+                                    team_id=str(franchise_id),
+                                    player_id=player.id,
+                                    week=self._get_current_nfl_week(),
+                                    season=self.current_season,
+                                    slot=player_info.get("status", "active"),
+                                )
+                            except Exception as e:
+                                logger.warning(f"Failed to snapshot MFL roster: {e}")
                 
                 db.commit()
                 logger.info("MFL roster sync completed successfully")
@@ -431,6 +460,13 @@ class RosterSyncService:
         except Exception as e:
             logger.error(f"Failed to sync MFL rosters: {e}")
             return False
+
+    def _get_current_nfl_week(self) -> int:
+        now = datetime.now()
+        if now.month >= 9:
+            return min(max(now.isocalendar()[1] - 35, 1), 18)
+        else:
+            return 1
     
     async def sync_all_rosters(self) -> Dict[str, bool]:
         """Sync rosters from both platforms"""
