@@ -82,7 +82,7 @@ class NFLDataService:
     def __init__(self):
         self.config = get_config()
         self.player_mapper = PlayerIDMapper()
-        self.current_season = 2025
+        self.current_season = self.config.get_current_season_year()
         
     def fetch_snap_counts(self, years: List[int] = None, weeks: List[int] = None) -> pd.DataFrame:
         """

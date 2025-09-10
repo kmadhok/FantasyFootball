@@ -439,6 +439,28 @@ class WaiverCandidates(Base):
         {'sqlite_autoincrement': True}
     )
 
+class PlayerRankings(Base):
+    __tablename__ = 'player_rankings'
+
+    id = Column(Integer, primary_key=True)
+    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
+    season = Column(Integer, nullable=False, default=2025)
+    source = Column(String(50), nullable=False, default='rotoballer')
+    rank = Column(Integer, nullable=True)
+    tier = Column(String(10), nullable=True)
+    position = Column(String(10), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    player = relationship("Player")
+
+    __table_args__ = (
+        UniqueConstraint('player_id', 'season', 'source', name='uq_player_rank_source_season'),
+        Index('idx_rank_source', 'source'),
+        Index('idx_rank_position', 'position'),
+        {'sqlite_autoincrement': True}
+    )
+
 # Database configuration
 from ..config import get_database_url, ensure_data_directory
 

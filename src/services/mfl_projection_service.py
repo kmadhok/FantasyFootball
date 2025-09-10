@@ -22,7 +22,7 @@ class MFLProjectionService:
 
     def __init__(self) -> None:
         self.config = get_config()
-        self.season = 2025
+        self.season = self.config.get_current_season_year()
         self.league_id = self.config.MFL_LEAGUE_ID
         self.base_url = f"https://api.myfantasyleague.com/{self.season}/export"
         self.timeout = 15
@@ -154,4 +154,3 @@ def test_mfl_projection_sync() -> bool:
 
 if __name__ == "__main__":
     test_mfl_projection_sync()
-

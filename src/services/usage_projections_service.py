@@ -40,7 +40,7 @@ class UsageProjectionsService:
         self.espn_service = ESPNDataService()
         self.mfl_service = MFLProjectionService()
         self.player_mapper = PlayerIDMapper()
-        self.current_season = 2025
+        self.current_season = self.config.get_current_season_year()
         
     def daily_sync_job(self) -> Dict[str, bool]:
         """Daily sync of projections and available usage data"""

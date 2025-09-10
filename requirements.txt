@@ -29,3 +29,7 @@ numpy==1.26.4
 nfl_data_py==0.3.3
 espn_api==0.21.0
 PyYAML==6.0.1
+beautifulsoup4==4.12.3
+lxml==4.9.4
+xlrd==2.0.1
+pandas-gbq==0.26.1

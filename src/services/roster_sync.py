@@ -96,7 +96,7 @@ class MFLAPIClient:
     
     def __init__(self):
         self.config = get_config()
-        self.season = 2025  # Current season
+        self.season = self.config.get_current_season_year()
         self.league_id = self.config.MFL_LEAGUE_ID
         self.api_key = self.config.MFL_LEAGUE_API_KEY
         self.base_url = f"https://api.myfantasyleague.com/{self.season}/export"

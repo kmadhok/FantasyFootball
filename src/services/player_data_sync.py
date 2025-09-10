@@ -44,7 +44,7 @@ class PlayerDataSyncService:
         self.sleeper_client = SleeperAPIClient()
         self.mfl_client = MFLAPIClient()
         self.player_mapper = PlayerIDMapper()
-        self.current_season = 2025
+        self.current_season = self.config.get_current_season_year()
         
     def sync_all_player_data(self) -> PlayerSyncResult:
         """

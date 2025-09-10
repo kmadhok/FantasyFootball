@@ -1,0 +1,193 @@
+{
+  "data_quality": {
+    "match_rate": 0.9975903614457832,
+    "total_csv_players": 415.0,
+    "matched_players": 414.0,
+    "position_match_rates": {
+      "QB": 1.0,
+      "RB": 0.98989898989899,
+      "WR": 1.0142857142857142,
+      "TE": 1.0,
+      "K": 0.96875,
+      "DST": 0.0
+    },
+    "projection_completeness": {
+      "proj_points": 99.7584541062802,
+      "proj_yards": 85.02415458937197,
+      "proj_td": 18.11594202898551,
+      "avg_adp": 100.0
+    }
+  },
+  "player_analysis": {
+    "position_distribution": {
+      "WR": 2037,
+      "LB": 1773,
+      "RB": 1586,
+      "CB": 1264,
+      "S": 1074,
+      "DT": 966,
+      "DE": 954,
+      "TE": 945,
+      "QB": 666,
+      "K": 276,
+      "PN": 215,
+      "DB": 146,
+      "DL": 136,
+      "OT": 53,
+      "XX": 16,
+      "C": 6,
+      "T": 1,
+      "?": 1
+    },
+    "top_teams": {
+      "FA": 8006,
+      "CLE": 157,
+      "TEN": 149,
+      "DET": 146,
+      "CIN": 141,
+      "MIA": 141,
+      "KCC": 139,
+      "NOS": 139,
+      "WAS": 136,
+      "ARI": 135
+    },
+    "platform_coverage": {
+      "sleeper_id": 50.80478745356996,
+      "mfl_id": 100.0,
+      "fantasypros_id": 37.95295088732976
+    }
+  },
+  "projection_analysis": {
+    "position_stats": {
+      "QB": {
+        "count": 32,
+        "mean": 18.578125,
+        "top_player": 24.2,
+        "top_10_avg": 21.470000000000002
+      },
+      "RB": {
+        "count": 98,
+        "mean": 6.886734693877551,
+        "top_player": 20.1,
+        "top_10_avg": 17.29
+      },
+      "WR": {
+        "count": 142,
+        "mean": 6.792253521126761,
+        "top_player": 16.7,
+        "top_10_avg": 15.580000000000002
+      },
+      "TE": {
+        "count": 80,
+        "mean": 4.17875,
+        "top_player": 13.7,
+        "top_10_avg": 11.2
+      }
+    },
+    "adp_projection_correlation": 0.10911792535659169,
+    "basic_stats": {
+      "points": {
+        "mean": 7.268038740920097,
+        "median": 6.6,
+        "std": 5.447061671476138,
+        "min": 0.0,
+        "max": 24.2,
+        "top_10_threshold": 15.58
+      }
+    }
+  },
+  "database_integration": {
+    "database_counts": {
+      "players": 17575,
+      "projections": 17468
+    },
+    "platform_id_coverage": {
+      "sleeper_id": 11264,
+      "mfl_id": 12287
+    },
+    "recent_csv_projections": 0
+  },
+  "statistical_insights": {
+    "top_value_players": [
+      {
+        "player_name": "Bijan Robinson",
+        "position": "RB",
+        "proj_points": 20.1,
+        "avg_adp": 2.0,
+        "value_score": 20.1
+      },
+      {
+        "player_name": "Christian McCaffrey",
+        "position": "RB",
+        "proj_points": 18.3,
+        "avg_adp": 7.0,
+        "value_score": 18.3
+      },
+      {
+        "player_name": "Saquon Barkley",
+        "position": "RB",
+        "proj_points": 17.8,
+        "avg_adp": 3.0,
+        "value_score": 17.8
+      },
+      {
+        "player_name": "Justin Jefferson",
+        "position": "WR",
+        "proj_points": 16.7,
+        "avg_adp": 6.0,
+        "value_score": 16.7
+      },
+      {
+        "player_name": "Ja'Marr Chase",
+        "position": "WR",
+        "proj_points": 16.6,
+        "avg_adp": 1.0,
+        "value_score": 16.6
+      },
+      {
+        "player_name": "Derrick Henry",
+        "position": "RB",
+        "proj_points": 16.5,
+        "avg_adp": 9.0,
+        "value_score": 16.5
+      },
+      {
+        "player_name": "Nico Collins",
+        "position": "WR",
+        "proj_points": 15.9,
+        "avg_adp": 12.0,
+        "value_score": 15.9
+      },
+      {
+        "player_name": "CeeDee Lamb",
+        "position": "WR",
+        "proj_points": 15.6,
+        "avg_adp": 5.0,
+        "value_score": 15.6
+      },
+      {
+        "player_name": "Jahmyr Gibbs",
+        "position": "RB",
+        "proj_points": 15.4,
+        "avg_adp": 4.0,
+        "value_score": 15.4
+      },
+      {
+        "player_name": "Malik Nabers",
+        "position": "WR",
+        "proj_points": 15.4,
+        "avg_adp": 10.0,
+        "value_score": 15.4
+      }
+    ],
+    "late_round_gems_count": 23
+  },
+  "recommendations": [
+    "DST matching is poor - implement team-based matching for defenses",
+    "sleeper_id coverage is low (50.8%) - consider updating ID mappings",
+    "proj_td is only 18.1% complete - consider data enrichment",
+    "proj_rec is only 72.2% complete - consider data enrichment",
+    "Consider setting up automated weekly data refresh",
+    "Implement alerts for significant ADP vs projection discrepancies"
+  ]
+}

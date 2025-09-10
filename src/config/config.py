@@ -55,6 +55,10 @@ class Config:
         
         # Slack Integration
         self.SLACK_WEBHOOK_URL: str = os.getenv('SLACK_WEBHOOK_URL', '')
+
+        # Yahoo scraping (optional)
+        self.YAHOO_COOKIE: str = os.getenv('YAHOO_COOKIE', '')
+        self.YAHOO_USER_AGENT: str = os.getenv('YAHOO_USER_AGENT', 'Mozilla/5.0 (Macintosh; Intel Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118 Safari/537.36')
         
         # Reddit API Configuration
         self.REDDIT_CLIENT_ID: str = os.getenv('REDDIT_CLIENT_ID', '')
@@ -146,6 +150,15 @@ class Config:
         except ValueError as e:
             logger.error(f"Invalid date format in NFL season configuration: {e}")
             return True  # Default to active if parsing fails
+
+    def get_current_season_year(self) -> int:
+        """Return the current NFL season year based on season start date."""
+        try:
+            start_date = datetime.strptime(self.NFL_SEASON_START_DATE, '%Y-%m-%d')
+            return start_date.year
+        except ValueError:
+            # Fallback to current year
+            return datetime.now().year
     
     def get_api_keys(self) -> dict:
         """Get all API keys for external services"""

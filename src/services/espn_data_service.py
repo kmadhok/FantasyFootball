@@ -35,7 +35,7 @@ class ESPNDataService:
         self.swid = self.config.SWID
         self.league = None
         self.player_mapper = PlayerIDMapper()
-        self.current_year = 2025
+        self.current_year = self.config.get_current_season_year()
         
     def authenticate_league(self) -> bool:
         """Authenticate with ESPN Fantasy API"""
