@@ -1,0 +1,5 @@
+nfl_stats:
+  year: 2025
+  week: 3
+  phase: "REG"
+  sort_hash: "yards"
