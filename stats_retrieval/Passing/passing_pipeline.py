@@ -9,10 +9,23 @@ def run(script, *args):
     subprocess.run(cmd, check=True)   # inherits stdout/stderr
 
 if __name__ == "__main__":
-    # 1) Run abc.py (add args after script name if needed)
-    run("passing_extraction.py")          # e.g., run("abc.py", "--week", 3)
+    import argparse
+    parser = argparse.ArgumentParser(description="Run passing data pipeline")
+    parser.add_argument("--year", type=int, default=2025, help="NFL season year")
+    parser.add_argument("--week", type=int, default=3, help="NFL week number")
+    parser.add_argument("--phase", default="REG", help="Season phase (REG, PRE, POST)")
+    parser.add_argument("--sort_hash", default="yards", help="Sort column")
+    parser.add_argument("--output", default=None, help="Output CSV filename")
+    args = parser.parse_args()
+    
+    # Generate default filename if not provided
+    if args.output is None:
+        args.output = f"ngs_passing_{args.year}_wk{args.week}.csv"
+    
+    # 1) Run passing_extraction.py with parameters
+    run("passing_extraction.py", "--year", args.year, "--week", args.week, "--phase", args.phase, "--sort_hash", args.sort_hash, "--output", args.output)
 
-    # 2) Only runs if abc.py succeeded (return code 0)
-    run("fix_csv_headers.py")          # e.g., run("bcd.py", "--phase", "REG")
+    # 2) Only runs if extraction succeeded (return code 0)
+    run("fix_csv_headers.py", "--input", args.output)
 
     print("✅ All done.")
