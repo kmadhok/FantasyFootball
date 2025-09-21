@@ -80,11 +80,16 @@ def fix_csv_headers(csv_file, headers):
 
 def main():
     """Main function to fix CSV headers"""
+    import argparse
+    parser = argparse.ArgumentParser(description="Fix CSV headers for NFL receiving stats")
+    parser.add_argument("--input", default="scrape_test.csv", help="Input CSV filename to fix")
+    args = parser.parse_args()
+    
     # Define file paths
     script_dir = Path(__file__).parent
     headers_file = script_dir / "receiving_headers.csv"
     csv_files = [
-        script_dir / "scrape_test.csv"
+        script_dir / args.input
     ]
     
     print("=== CSV Header Fix Tool ===\n")
