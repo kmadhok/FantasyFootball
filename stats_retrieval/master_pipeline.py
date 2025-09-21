@@ -16,10 +16,34 @@ from pathlib import Path
 # =============================================================================
 # CONFIGURATION - Edit the weeks list as needed
 # =============================================================================
-WEEKS = [4]  # List of weeks to process
+WEEKS = [1, 2, 3, 4, 5]  # List of weeks to process
 YEAR = 2025              # Season year
 PHASE = "REG"            # Season phase (REG, PRE, POST)  
 SORT_HASH = "yards"      # Sort parameter
+UPLOAD_TO_BIGQUERY = False  # Set to True to automatically upload to BigQuery after CSV generation
+
+def is_csv_valid(csv_path):
+    """
+    Check if a CSV file exists and has valid data (at least 3 lines: header + 2 data rows)
+    
+    Args:
+        csv_path: Path object to the CSV file
+        
+    Returns:
+        bool: True if file exists and has at least 3 lines, False otherwise
+    """
+    try:
+        if not csv_path.exists():
+            return False
+            
+        with open(csv_path, 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+            # Need at least 3 lines: header + 2 data rows
+            return len(lines) >= 3
+            
+    except Exception:
+        # If we can't read the file, consider it invalid
+        return False
 
 def run_pipeline(pipeline_folder, stat_type, week, year=YEAR, phase=PHASE, sort_hash=SORT_HASH):
     """
@@ -38,16 +62,26 @@ def run_pipeline(pipeline_folder, stat_type, week, year=YEAR, phase=PHASE, sort_
     """
     # Set up paths
     script_dir = Path(__file__).parent
+    data_dir = script_dir / "data"
     pipeline_dir = script_dir / pipeline_folder
     pipeline_script = pipeline_dir / f"{stat_type}_pipeline.py"
+    
+    # Ensure data directory exists
+    data_dir.mkdir(exist_ok=True)
     
     # Check if pipeline script exists
     if not pipeline_script.exists():
         print(f"❌ Pipeline script not found: {pipeline_script}")
         return False
     
-    # Generate output filename in master directory
-    output_file = script_dir / f"ngs_{stat_type}_{year}_wk{week}.csv"
+    # Generate output filename in data directory
+    output_file = data_dir / f"ngs_{stat_type}_{year}_wk{week}.csv"
+    
+    # Check if valid data already exists
+    if is_csv_valid(output_file):
+        print(f"⏭️ Skipping {pipeline_folder} week {week} - valid data already exists")
+        print(f"   📄 File: {output_file.name}")
+        return True
     
     # Build command
     cmd = [
@@ -57,7 +91,7 @@ def run_pipeline(pipeline_folder, stat_type, week, year=YEAR, phase=PHASE, sort_
         "--week", str(week), 
         "--phase", phase,
         "--sort_hash", sort_hash,
-        "--output", f"../{output_file.name}"  # Relative path to master directory
+        "--output", f"../data/{output_file.name}"  # Relative path to data directory
     ]
     
     try:
@@ -140,10 +174,11 @@ def main():
         
         # List generated files
         script_dir = Path(__file__).parent
+        data_dir = script_dir / "data"
         generated_files = []
         for week in WEEKS:
             for _, stat_type in pipelines:
-                output_file = script_dir / f"ngs_{stat_type}_{YEAR}_wk{week}.csv"
+                output_file = data_dir / f"ngs_{stat_type}_{YEAR}_wk{week}.csv"
                 if output_file.exists():
                     generated_files.append(output_file.name)
         
@@ -151,6 +186,28 @@ def main():
             print(f"\n📄 Generated files ({len(generated_files)}):")
             for filename in sorted(generated_files):
                 print(f"   {filename}")
+        
+        # Optional BigQuery upload
+        if UPLOAD_TO_BIGQUERY and generated_files:
+            print("\n" + "=" * 50)
+            print("🚀 Starting BigQuery Upload...")
+            try:
+                import subprocess
+                result = subprocess.run([
+                    sys.executable, 
+                    "bigquery_upload.py"
+                ], capture_output=True, text=True, cwd=script_dir)
+                
+                if result.returncode == 0:
+                    print("✅ BigQuery upload completed successfully!")
+                    print(result.stdout)
+                else:
+                    print("❌ BigQuery upload failed!")
+                    print(result.stderr)
+                    
+            except Exception as e:
+                print(f"❌ Error running BigQuery upload: {e}")
+                print("💡 To upload manually, run: python bigquery_upload.py")
         
         return 0
 
